@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>亲子探索 · 北京</title>
+  <style>
+    :root {
+      --green-primary: #4A9B6F;
+      --green-light:   #E8F5EE;
+      --green-dark:    #2D7A52;
+      --bg:            #F5F7F2;
+      --white:         #FFFFFF;
+      --orange:        #FF8C42;
+      --text-primary:  #1A2E1A;
+      --text-secondary:#6B7F6B;
+      --text-muted:    #9AAD9A;
+      --border:        #E2EBE2;
+      --shadow:        0 2px 12px rgba(0,0,0,0.08);
+      --shadow-card:   0 4px 20px rgba(74,155,111,0.12);
+      --radius-card:   16px;
+      --radius-tag:    20px;
+      --radius-btn:    12px;
+      --park-p:        #4A9B6F;
+      --park-r:        #4A8BBF;
+      --park-n:        #FF8C42;
+      --park-h:        #9B6FCA;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      height: 100%;
+      font-family: -apple-system, 'PingFang SC', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-size: 15px;
+      line-height: 1.5;
+      overflow: hidden;
+    }
+    #app {
+      width: 100%;
+      max-width: 430px;
+      height: 100vh;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    /* ---- 页面容器 ---- */
+    .page {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.32s cubic-bezier(0.4,0,0.2,1), opacity 0.32s ease;
+      background: var(--bg);
+    }
+    .page.hidden { transform: translateX(100%); opacity: 0; pointer-events: none; }
+    .page.slide-left { transform: translateX(-30%); opacity: 0; pointer-events: none; }
+
+    /* ---- 滚动区 ---- */
+    .scrollable { overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; }
+
+    /* ---- 停车类型徽章 ---- */
+    .parking-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; border-radius: 8px;
+      font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
+    }
+    .badge-p { background: var(--park-p); }
+    .badge-r { background: var(--park-r); }
+    .badge-n { background: var(--park-n); }
+    .badge-h { background: var(--park-h); }
+
+    /* ---- 首页 Header ---- */
+    .home-header {
+      background: var(--white);
+      padding: 52px 20px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .header-top {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 14px;
+    }
+    .logo { display: flex; align-items: center; gap: 8px; }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--green-primary); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .logo-text { font-size: 18px; font-weight: 800; color: var(--green-dark); letter-spacing: -0.3px; }
+    .logo-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .city-chip {
+      display: flex; align-items: center; gap: 5px;
+      padding: 6px 12px; background: var(--green-light);
+      border-radius: 20px; font-size: 13px; font-weight: 600;
+      color: var(--green-dark);
+    }
+    .search-bar {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: var(--radius-btn); padding: 10px 14px;
+    }
+    .search-bar input {
+      flex: 1; border: none; background: transparent;
+      font-size: 14px; color: var(--text-primary); outline: none;
+    }
+    .search-bar input::placeholder { color: var(--text-muted); }
+
+    /* ---- 筛选栏 ---- */
+    .filter-bar {
+      background: var(--white); padding: 12px 0 12px 20px;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto; display: flex; gap: 8px;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .filter-bar::after { content: ''; padding-right: 20px; flex-shrink: 0; }
+    .filter-tag {
+      flex-shrink: 0; padding: 6px 14px; border-radius: var(--radius-tag);
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      border: 1.5px solid var(--border); background: var(--white);
+      color: var(--text-secondary); transition: all 0.18s ease; user-select: none;
+    }
+    .filter-tag.active { background: var(--green-primary); border-color: var(--green-primary); color: var(--white); }
+
+    /* ---- 地点卡片 ---- */
+    .places-list { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+    .place-card {
+      background: var(--white); border-radius: var(--radius-card);
+      padding: 18px; box-shadow: var(--shadow); cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      border: 1.5px solid transparent;
+    }
+    .place-card:active { transform: scale(0.985); box-shadow: var(--shadow-card); border-color: var(--green-light); }
+    .place-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .place-name-row { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+    .place-name { font-size: 17px; font-weight: 700; color: var(--text-primary); }
+    .place-cost { font-size: 12px; white-space: nowrap; font-weight: 600; flex-shrink: 0; }
+    .place-address-row { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .place-note { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.4; }
+    .place-facilities { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .facility-mini {
+      font-size: 12px; padding: 3px 9px;
+      background: var(--green-light); color: var(--green-dark);
+      border-radius: 10px; font-weight: 500;
+    }
+    .place-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 10px; border-top: 1px solid var(--border);
+    }
+    .parking-hint { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-secondary); }
+    .parking-hint.free { color: var(--green-dark); font-weight: 500; }
+    .facility-count { font-size: 12px; color: var(--text-muted); }
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+    .empty-state .emoji { font-size: 48px; margin-bottom: 12px; }
+    .empty-state p { font-size: 15px; }
+    .list-bottom-space { height: 24px; }
+
+    /* ---- 详情页 ---- */
+    .detail-header {
+      background: var(--white); padding: 52px 20px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .back-btn {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 15px; font-weight: 500; color: var(--green-primary);
+      cursor: pointer; width: fit-content;
+    }
+    .detail-nav-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .detail-edit-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 14px; font-weight: 600; color: var(--green-primary);
+      cursor: pointer; padding: 6px 14px; border-radius: 20px;
+      background: var(--green-light);
+    }
+    .detail-name { font-size: 22px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px; letter-spacing: -0.3px; }
+    .detail-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .detail-address { font-size: 13px; color: var(--text-secondary); display: flex; align-items: flex-start; gap: 4px; line-height: 1.4; }
+    .detail-body { padding: 20px 16px; display: flex; flex-direction: column; gap: 20px; }
+    .detail-section {
+      background: var(--white); border-radius: var(--radius-card);
+      padding: 18px; box-shadow: var(--shadow);
+    }
+    .section-title { font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; }
+    .stars { color: #FFB300; font-size: 13px; letter-spacing: 1px; }
+    .facilities-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .facility-tag {
+      display: flex; align-items: center; gap: 5px;
+      padding: 6px 12px; background: var(--green-light);
+      color: var(--green-dark); border-radius: var(--radius-tag);
+      font-size: 13px; font-weight: 500;
+    }
+
+    /* ---- 停车区块 ---- */
+    .parking-tabs { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; scrollbar-width: none; }
+    .parking-tabs::-webkit-scrollbar { display: none; }
+    .parking-tab {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 10px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      border: 2px solid var(--border); background: var(--white);
+      color: var(--text-secondary); transition: all 0.18s ease;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .parking-tab.active.tab-p { border-color: var(--park-p); background: #E8F5EE; color: var(--park-p); }
+    .parking-tab.active.tab-r { border-color: var(--park-r); background: #EBF3FB; color: var(--park-r); }
+    .parking-tab.active.tab-n { border-color: var(--park-n); background: #FFF4EB; color: var(--park-n); }
+    .parking-tab.active.tab-h { border-color: var(--park-h); background: #F3EBFD; color: var(--park-h); }
+    .parking-cards { display: flex; flex-direction: column; gap: 10px; }
+    .parking-card {
+      border: 1.5px solid var(--border); border-radius: 12px;
+      padding: 14px; background: var(--bg);
+    }
+    .parking-card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .parking-card-name { font-size: 15px; font-weight: 600; color: var(--text-primary); flex: 1; }
+    .parking-tip {
+      background: #FFFBF0; border: 1px solid #FFE9A0; border-radius: 8px;
+      padding: 8px 10px; font-size: 12px; color: #7A5800;
+      display: flex; align-items: flex-start; gap: 6px; line-height: 1.5;
+    }
+
+    /* ---- 管理入口按钮 ---- */
+    .admin-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      font-size: 18px; cursor: pointer; transition: all 0.15s ease;
+    }
+    .admin-btn:active { background: var(--green-light); border-color: var(--green-primary); }
+
+    /* ---- 密码弹窗 ---- */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 999;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.show { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      background: var(--white); border-radius: 20px; padding: 28px 24px 24px;
+      width: 300px; text-align: center; box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+      transform: scale(0.9); transition: transform 0.25s ease;
+    }
+    .modal-overlay.show .modal-box { transform: scale(1); }
+    .modal-title { font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+    .modal-sub { font-size:13px; color:var(--text-muted); margin-bottom:20px; }
+    .pwd-input {
+      width: 100%; height: 48px; border: 2px solid var(--border);
+      border-radius: var(--radius-btn); text-align: center; font-size: 22px;
+      letter-spacing: 8px; font-weight: 700; color: var(--text-primary);
+      outline: none; -webkit-text-security: disc; margin-bottom: 16px;
+    }
+    .pwd-input:focus { border-color: var(--green-primary); }
+    .pwd-error { font-size:12px; color:#E74C3C; margin-bottom:14px; min-height:18px; }
+    .modal-btn-row { display: flex; gap: 10px; }
+    .modal-btn {
+      flex:1; height:42px; border-radius: var(--radius-btn); font-size:15px;
+      font-weight:600; border:none; cursor: pointer; transition: all 0.15s ease;
+    }
+    .modal-btn-cancel { background:var(--bg); color:var(--text-secondary); border:1.5px solid var(--border); }
+    .modal-btn-cancel:active { background:var(--border); }
+    .modal-btn-ok { background:var(--green-primary); color:white; }
+    .modal-btn-ok:active { background:var(--green-dark); }
+
+    /* ---- 编辑表单页 ---- */
+    .form-header {
+      background: var(--white); padding: 52px 20px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .form-title { font-size:18px; font-weight:800; color:var(--green-dark); }
+    .form-scrollable { overflow-y: auto; -webkit-overflow-scrolling: touch; flex:1; }
+    .form-body { padding: 16px; display:flex; flex-direction:column; gap:14px; }
+    .form-group { background:var(--white); border-radius:var(--radius-card); padding:16px; box-shadow:var(--shadow); }
+    .form-label { font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:8px; display:block; }
+    .form-input, .form-textarea {
+      width:100%; border:1.5px solid var(--border); border-radius:10px;
+      padding:10px 12px; font-size:14px; color:var(--text-primary);
+      outline: none; background:var(--bg); font-family:inherit;
+    }
+    .form-input:focus, .form-textarea:focus { border-color:var(--green-primary); background:var(--white); }
+    .form-textarea { resize:vertical; min-height:60px; line-height:1.5; }
+    .form-hint { font-size:11px; color:var(--text-muted); margin-top:4px; }
+    /* 设施多选 */
+    .fac-select { display:flex; flex-wrap:wrap; gap:8px; }
+    .fac-check {
+      padding:6px 12px; border-radius:var(--radius-tag); font-size:13px;
+      border:1.5px solid var(--border); background:var(--white);
+      color:var(--text-secondary); cursor:pointer; transition:all 0.15s ease;
+      user-select: none;
+    }
+    .fac-check.selected { border-color:var(--green-primary); background:var(--green-light); color:var(--green-dark); font-weight:500; }
+    .fac-check:active { transform:scale(0.95); }
+    /* 停车场列表（编辑态） */
+    .pk-editor { display:flex; flex-direction:column; gap:10px; }
+    .pk-item { border:1.5px solid var(--border); border-radius:12px; padding:14px; background:var(--bg); }
+    .pk-item-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .pk-item-name { font-size:14px; font-weight:600; color:var(--text-primary); flex:1; }
+    .pk-del-btn {
+      width:28px; height:28px; border-radius:50%; border:none; background:#FDECEA;
+      color:#E74C3C; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    }
+    .pk-del-btn:active { background:#F5C6CB; }
+    .pk-field { margin-bottom:8px; }
+    .pk-field input, .pk-field select { width:100%; border:1.5px solid var(--border); border-radius:8px; padding:8px 10px; font-size:13px; color:var(--text-primary); outline:none; background:var(--white); }
+    .pk-field input:focus, .pk-field select:focus { border-color:var(--green-primary); }
+    .add-pk-btn {
+      display:flex; align-items:center; justify-content:center; gap:6px;
+      width:100%; height:40px; border:2px dashed var(--border); border-radius:12px;
+      background:transparent; color:var(--text-muted); font-size:14px; font-weight:500;
+      cursor:pointer; transition:all 0.15s ease;
+    }
+    .add-pk-btn:active { border-color:var(--green-primary); color:var(--green-primary); background:var(--green-light); }
+    /* 底部操作栏 */
+    .form-actions {
+      display:flex; gap:10px; padding: 14px 16px 24px;
+      background:linear-gradient(to top, var(--bg) 60%, transparent);
+    }
+    .form-actions button { flex:1; height:46px; border-radius:var(--radius-btn); font-size:16px; font-weight:700; border:none; cursor:pointer; }
+    .btn-save { background:var(--green-primary); color:white; }
+    .btn-save:active { background:var(--green-dark); }
+    .btn-delete { background:#FDECEA; color:#E74C3C; }
+    .btn-delete:active { background:#F5C6CB; }
+    .btn-cancel-form { background:var(--bg); color:var(--text-secondary); border:1.5px solid var(--border); }
+    .btn-cancel-form:active { background:var(--border); }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- 首页 -->
+  <div class="page" id="page-home">
+    <div class="home-header">
+      <div class="header-top">
+        <div class="logo">
+          <div class="logo-icon">🌿</div>
+          <div>
+            <div class="logo-text">亲子探索</div>
+            <div class="logo-sub">带娃去哪玩，一看就知道</div>
+          </div>
+        </div>
+        <div class="city-chip">📍 北京</div>
+        <div class="admin-btn" onclick="showPwdModal()" title="管理">⚙️</div>
+      </div>
+      <div class="search-bar">
+        <span style="font-size:16px;color:var(--text-muted)">🔍</span>
+        <input type="text" placeholder="搜索公园、设施..." id="search-input" />
+      </div>
+    </div>
+
+    <!-- 设施筛选栏 -->
+    <div class="filter-bar" id="filter-bar">
+      <div class="filter-tag active" data-filter="all">全部</div>
+      <div class="filter-tag" data-filter="沙坑">🏖️ 沙坑</div>
+      <div class="filter-tag" data-filter="游乐设施">🛝 游乐设施</div>
+      <div class="filter-tag" data-filter="戏水区">💧 戏水区</div>
+      <div class="filter-tag" data-filter="大草坪">🌱 大草坪</div>
+      <div class="filter-tag" data-filter="骑行道">🚲 骑行道</div>
+      <div class="filter-tag" data-filter="树荫">🌳 树荫</div>
+    </div>
+
+    <!-- 地点列表 -->
+    <div class="scrollable">
+      <div class="places-list" id="places-list"></div>
+      <div class="list-bottom-space"></div>
+    </div>
+  </div>
+
+  <!-- 详情页 -->
+  <div class="page hidden" id="page-detail">
+    <div class="detail-header">
+      <div class="detail-nav-row">
+        <div class="back-btn" id="back-btn"><span style="font-size:18px">←</span> 返回</div>
+        <div class="detail-edit-btn" id="detail-edit-btn" style="display:none" onclick="">✏️ 编辑</div>
+      </div>
+      <div class="detail-name" id="detail-name"></div>
+      <div class="detail-meta" id="detail-meta"></div>
+      <div class="detail-address" id="detail-address"></div>
+    </div>
+    <div class="scrollable">
+      <div class="detail-body">
+        <div class="detail-section">
+          <div class="section-title">🎯 设施配置</div>
+          <div class="facilities-grid" id="detail-facilities"></div>
+        </div>
+        <div class="detail-section">
+          <div class="section-title">🚗 停车方案</div>
+          <div class="parking-cards" id="parking-cards"></div>
+        </div>
+      </div>
+      <div class="list-bottom-space"></div>
+    </div>
+  </div>
+
+  <!-- 密码弹窗 -->
+  <div class="modal-overlay" id="pwd-modal">
+    <div class="modal-box">
+      <div class="modal-title">🔐 管理员验证</div>
+      <div class="modal-sub">请输入管理密码以继续</div>
+      <input type="tel" maxlength="6" class="pwd-input" id="pwd-input" placeholder="······" autocomplete="off" />
+      <div class="pwd-error" id="pwd-error"></div>
+      <div class="modal-btn-row">
+        <button class="modal-btn modal-btn-cancel" onclick="hidePwdModal()">取消</button>
+        <button class="modal-btn modal-btn-ok" onclick="checkPassword()">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 编辑表单页 -->
+  <div class="page hidden" id="page-form">
+    <div class="form-header">
+      <div class="back-btn" id="form-back-btn"><span style="font-size:18px">←</span> 返回</div>
+      <div class="form-title" id="form-title-text">编辑公园</div>
+    </div>
+    <div class="scrollable form-scrollable">
+      <div class="form-body" id="form-body">
+        <!-- 基本信息 -->
+        <div class="form-group">
+          <label class="form-label">公园名称 *</label>
+          <input type="text" class="form-input" id="f-name" placeholder="如：四得公园" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">地址 *</label>
+          <input type="text" class="form-input" id="f-address" placeholder="详细地址" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">距离 (km) *</label>
+          <input type="number" step="0.1" class="form-input" id="f-distance" placeholder="如：6.5" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">费用</label>
+          <input type="text" class="form-input" id="f-cost" placeholder="如：免费 / 15元/人" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">一句话备注</label>
+          <textarea class="form-textarea" id="f-note" placeholder="这个公园的特色、提示等..."></textarea>
+        </div>
+
+        <!-- 设施多选 -->
+        <div class="form-group">
+          <label class="form-label">设施标签（可多选）</label>
+          <div class="fac-select" id="fac-select"></div>
+        </div>
+
+        <!-- 停车场 -->
+        <div class="form-group">
+          <label class="form-label">园区停车场</label>
+          <div class="pk-editor" id="pk-editor"></div>
+          <button class="add-pk-btn" onclick="addPkItem()">＋ 添加停车场</button>
+        </div>
+      </div>
+
+      <div class="form-actions" id="form-actions">
+        <button class="btn-cancel-form" onclick="cancelForm()">取消</button>
+        <button class="btn-delete" id="btn-delete" onclick="deletePlace()" style="display:none">删除</button>
+        <button class="btn-save" onclick="saveForm()">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==========================================
+   常量
+========================================= */
+var ADMIN_PASSWORD = "123123";
+var VALID_FACILITIES = ["沙坑","游乐设施","戏水区","大草坪","骑行道","树荫"];
+var facilityEmoji = {"沙坑":"🏖️","游乐设施":"🛝","戏水区":"💧","大草坪":"🌱","骑行道":"🚲","树荫":"🌳"};
+
+/* ==========================================
+   数据 & 持久化
+========================================= */
+function loadPlaces() {
+  try {
+    var saved = localStorage.getItem("park_places");
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  return null;
+}
+function savePlaces(data) {
+  localStorage.setItem("park_places", JSON.stringify(data));
+}
+
+/* 默认数据（首次加载使用，后续用 localStorage） */
+var DEFAULT_PLACES = [
+  {
+    id: 1,
+    name: "四得公园",
+    address: "北京市朝阳区酒仙桥路将台地区",
+    distance: "6.5",
+    cost: "免费",
+    note: "全龄友好改造后的新公园，樱花剧场和智慧体育设施是亮点，人少清静",
+    facilities: ["大草坪", "游乐设施", "树荫", "骑行道"],
+    parking: [
+      { type:"P", name:"四得公园停车场",   address:"公园东门旁",                      walk_min:2,  peak_tip:"车位不多但够用，周末上午10点后紧张" }
+    ]
+  },
+  {
+    id: 2,
+    name: "双秀公园",
+    address: "北京市西城区北三环中路20号",
+    distance: "9.2",
+    cost: "0.2元",
+    note: "北京唯一的日式风格小公园，2毛门票40年没涨，闹中取静的宝藏",
+    facilities: ["大草坪", "树荫"],
+    parking: [
+      { type:"P", name:"公园内部停车场",   address:"北三环中路公园北侧",             walk_min:2,  peak_tip:"极少量车位，基本靠运气，建议备选方案" }
+    ]
+  },
+  {
+    id: 3,
+    name: "北京动物园",
+    address: "北京市西城区西直门外大街137号",
+    distance: "8.1",
+    cost: "15元/人（联票含熊猫馆19元）",
+    note: "熊猫馆和儿童动物园是亲子必看，建议南门进，半天刚好",
+    facilities: ["大草坪", "树荫", "游乐设施", "戏水区"],
+    parking: [
+      { type:"P", name:"动物园南门停车场",  address:"西直门外大街南门对面",           walk_min:3,  peak_tip:"节假日爆满！建议地铁出行或工作日开车" },
+      { type:"P", name:"动物园北门停车场",  address:"西直门外大街北门附近",           walk_min:5,  peak_tip:"比南门略好停一点，但步行距离更远" }
+    ]
+  },
+  {
+    id: 4,
+    name: "紫竹院公园",
+    address: "北京市海淀区中关村南大街21号",
+    distance: "6.8",
+    cost: "免费",
+    note: "闹中取静的小而美公园，划船和竹林是特色，夏天荷花很美",
+    facilities: ["沙坑", "游乐设施", "树荫", "大草坪"],
+    parking: [
+      { type:"P", name:"南门停车场",       address:"紫竹院路南门入口",               walk_min:3,  peak_tip:"车位不多，周末上午很快满。建议8点半前到" }
+    ]
+  },
+  {
+    id: 5,
+    name: "首钢园",
+    address: "北京市石景山区石景山路68号",
+    distance: "18.5",
+    cost: "免费（园内项目另收费）",
+    note: "工业风遛娃胜地，无人驾驶、高空栈道、滑雪大跳台，拍照超出片",
+    facilities: ["大草坪", "骑行道", "树荫", "游乐设施"],
+    parking: [
+      { type:"P", name:"六工汇地下停车场",  address:"石景山路68号六工汇购物中心B1",   walk_min:5,  peak_tip:"最大最方便，带娃首选这里，吃喝配套全" },
+      { type:"P", name:"香格里拉酒店停车场",address:"首钢园内香格里拉酒店",          walk_min:8,  peak_tip:"住客免费，访客也可停，车位充裕环境好" }
+    ]
+  },
+  {
+    id: 6,
+    name: "北坞公园",
+    address: "北京市海淀区北坞村路（颐和园西门外）",
+    distance: "11.2",
+    cost: "免费",
+    note: "借景颐和园和玉泉山，稻田景观独特，春天油菜花秋天的芦苇超美",
+    facilities: ["大草坪", "树荫", "骑行道"],
+    parking: [
+      { type:"P", name:"北坞公园停车场",   address:"北坞村路与玉泉山路交叉口",       walk_min:2,  peak_tip:"公园自有停车场，免费且车位较多，强烈推荐" }
+    ]
+  },
+  {
+    id: 7,
+    name: "松林公园",
+    address: "北京市石景山区松林东路与苹果园南路交叉口",
+    distance: "15.3",
+    cost: "免费",
+    note: "石景山刚改造完的宝藏公园，22万平米大草坪和长廊步道，适合骑车跑步",
+    facilities: ["大草坪", "树荫", "骑行道", "游乐设施"],
+    parking: [
+      { type:"P", name:"公园周边停车场",   address:"松林东路公园入口处",             walk_min:2,  peak_tip:"新建成的配套车位，目前还比较好停" }
+    ]
+  },
+  {
+    id: 8,
+    name: "檀谷慢闪公园",
+    address: "北京市门头沟区京潭中路与九峰路交叉口西南120米",
+    distance: "32.0",
+    cost: "平日9.9元 / 周末29.9元（1.2米以下儿童免费）",
+    note: "阿那亚团队打造的山系生活地标，彩虹滑梯+昆虫博物基地，适合安排一整天",
+    facilities: ["沙坑", "游乐设施", "大草坪", "树荫", "戏水区"],
+    parking: [
+      { type:"P", name:"檀谷慢闪公园停车场",address:"公园正门旁配套停车场",            walk_min:1,  peak_tip:"目前免费停车！就在门口，最方便" }
+    ]
+  }
+];
+
+/* 初始化：优先从 localStorage 加载，否则用默认数据 */
+var PLACES = loadPlaces() || DEFAULT_PLACES;
+/* 首次自动保存默认数据 */
+if (!loadPlaces()) savePlaces(PLACES);
+
+/* 工具函数 */
+function emoji(name) { return facilityEmoji[name] || "✅"; }
+function stars(r) { var s = ""; for(var i=0;i<Math.floor(r);i++) s+="★"; if(r%1>=0.5) s+="½"; return s; }
+function badgeClass(t) { return ({P:"badge-p",R:"badge-r",N:"badge-n",H:"badge-h"})[t]||"badge-p"; }
+function tabClass(t)   { return ({P:"tab-p", R:"tab-r", N:"tab-n", H:"tab-h"})[t]||"tab-p"; }
+function parkLabel(t) { return ({P:"🏛️ 园区",R:"🛣️ 路侧",N:"🏬 附近",H:"🔮 隐藏"})[t]||t; }
+function hasFree(p)   { return false; }
+
+/* 状态 */
+var currentFilter = "all";
+var currentParkingType = null;
+
+/* 首页渲染 */
+function renderHomeList(places) {
+  var c = document.getElementById("places-list");
+  if (!places || !places.length) {
+    c.innerHTML = '<div class="empty-state"><div class="emoji">🌿</div><p>没有找到包含该设施的地点</p><p style="margin-top:6px;font-size:13px;color:var(--text-muted)">试试切换其他设施筛选</p></div>';
+    return;
+  }
+  var html = "";
+  for (var i = 0; i < places.length; i++) {
+    var p = places[i];
+    var fac = p.facilities.slice(0, 5);
+    var free = hasFree(p);
+    var costColor = p.cost === "免费" ? "var(--green-dark)" : "#E67E00";
+    html += '<div class="place-card" onclick="openDetail('+p.id+')">'
+      + '<div class="place-card-top">'
+      + '<div class="place-name-row">'
+      + '<div class="place-name">'+p.name+'</div>'
+      + '<div class="place-cost" style="color:'+costColor+'">'+p.cost+'</div>'
+      + '</div></div>'
+      + '<div class="place-address-row">📍 '+p.address+' &nbsp;|&nbsp; 🚶 '+p.distance+' km</div>'
+      + (p.note ? '<div class="place-note">💬 '+p.note+'</div>' : '')
+      + '<div class="place-facilities">';
+    for (var j = 0; j < fac.length; j++) {
+      html += '<span class="facility-mini">'+emoji(fac[j])+' '+fac[j]+'</span>';
+    }
+    if (p.facilities.length > 5) {
+      html += '<span class="facility-mini" style="color:var(--text-muted)">+'+(p.facilities.length-5)+'</span>';
+    }
+    html += '</div><div class="place-footer">';
+    html += '<div class="parking-hint'+(free?' free':'')+'">🚗 '+p.parking.length+' 个停车方案'+(free?'（含免费）':'')+'</div>';
+    html += '<div class="facility-count">🎯 '+p.facilities.length+' 项设施</div>';
+    html += '</div></div>';
+  }
+  c.innerHTML = html;
+}
+
+/* 筛选逻辑 */
+function getFilteredPlaces() {
+  var q = document.getElementById("search-input").value.trim().toLowerCase();
+  var list = PLACES;
+  if (currentFilter !== "all") {
+    list = list.filter(function(p){ return p.facilities.indexOf(currentFilter) !== -1; });
+  }
+  if (q) {
+    list = list.filter(function(p){
+      return p.name.toLowerCase().indexOf(q) !== -1
+        || p.address.toLowerCase().indexOf(q) !== -1
+        || p.facilities.some(function(f){ return f.toLowerCase().indexOf(q) !== -1; });
+    });
+  }
+  return list;
+}
+
+/* 筛选栏事件 */
+document.getElementById("filter-bar").addEventListener("click", function(e) {
+  var tag = e.target.closest(".filter-tag");
+  if (!tag) return;
+  var tags = document.querySelectorAll(".filter-tag");
+  for (var i = 0; i < tags.length; i++) tags[i].classList.remove("active");
+  tag.classList.add("active");
+  currentFilter = tag.getAttribute("data-filter");
+  renderHomeList(getFilteredPlaces());
+});
+document.getElementById("search-input").addEventListener("input", function() {
+  renderHomeList(getFilteredPlaces());
+});
+
+/* 页面切换 */
+function showPage(pageId, direction) {
+  var pages = document.querySelectorAll(".page");
+  var target = document.getElementById(pageId);
+  for (var i = 0; i < pages.length; i++) {
+    var pg = pages[i];
+    if (direction === "forward") {
+      if (!pg.classList.contains("hidden") && pg !== target) pg.classList.add("slide-left");
+    } else {
+      if (!pg.classList.contains("hidden") && pg !== target) pg.classList.add("hidden");
+    }
+  }
+  target.classList.remove("hidden", "slide-left");
+  setTimeout(function(){
+    for (var i = 0; i < pages.length; i++) {
+      var pg = pages[i];
+      if (pg !== target) { pg.classList.add("hidden"); pg.classList.remove("slide-left"); }
+    }
+  }, 350);
+}
+
+function openDetail(id) {
+  var place = null;
+  for (var i = 0; i < PLACES.length; i++) {
+    if (PLACES[i].id === id) { place = PLACES[i]; break; }
+  }
+  if (!place) return;
+  renderDetail(place);
+  showPage("page-detail", "forward");
+}
+document.getElementById("back-btn").addEventListener("click", function() {
+  showPage("page-home", "back");
+});
+
+/* 详情页渲染 */
+function renderDetail(p) {
+  document.getElementById("detail-name").textContent = p.name;
+  document.getElementById("detail-meta").innerHTML =
+    '<span style="font-size:13px;font-weight:600;color:'+(p.cost==="免费"?"var(--green-dark)":"#E67E00")+'">'+(p.cost==="免费"?"🆓 免费":p.cost)+'</span>'
+    + '<span style="color:var(--text-muted);font-size:13px">&nbsp;|&nbsp; 🚶 '+p.distance+' km</span>';
+  document.getElementById("detail-address").innerHTML = "<span>📍</span><span>"+p.address+"</span>";
+  /* 先清除上一次的 note 元素（如果有） */
+  var oldNote = document.getElementById("detail-note");
+  if (oldNote) oldNote.remove();
+  if (p.note) {
+    var noteEl = document.createElement("div");
+    noteEl.id = "detail-note";
+    noteEl.style.cssText = "font-size:13px;color:var(--text-muted);margin-top:6px;display:flex;align-items:flex-start;gap:4px;line-height:1.4";
+    noteEl.innerHTML = "<span>💬</span><span>"+p.note+"</span>";
+    document.getElementById("detail-address").insertAdjacentElement("afterend", noteEl);
+  }
+
+  // 设施
+  var fhtml = "";
+  for (var i = 0; i < p.facilities.length; i++) {
+    fhtml += '<div class="facility-tag">'+emoji(p.facilities[i])+" "+p.facilities[i]+"</div>";
+  }
+  document.getElementById("detail-facilities").innerHTML = fhtml;
+
+  // 停车：直接显示所有停车场（不再用 Tab 分类）
+  renderAllParkingCards(p);
+}
+
+function renderParkingTabs(place, types) {
+  /* 不再需要 Tab 分类，保留函数避免报错但留空 */
+  document.getElementById("parking-tabs").innerHTML = "";
+}
+
+function renderAllParkingCards(place) {
+  var h = "";
+  for (var i = 0; i < place.parking.length; i++) {
+    var pk = place.parking[i];
+    h += '<div class="parking-card">'
+      + '<div class="parking-card-top">'
+      + '<div class="parking-badge '+badgeClass(pk.type)+'">'+pk.type+"</div>"
+      + '<div class="parking-card-name">'+pk.name+'</div>'
+      + '<div style="font-size:12px;color:var(--text-muted)">🚶 '+pk.walk_min+"分钟</div>"
+      + "</div>"
+      + '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;line-height:1.4">📍 '+pk.address+"</div>"
+      + '<div class="parking-tip">💡 <span>'+pk.peak_tip+"</span></div>"
+      + "</div>";
+  }
+  document.getElementById("parking-cards").innerHTML = h;
+}
+
+function selectParkingTab(type, placeId) { /* 不再使用 */ }
+
+function renderParkingCards(place, type) {
+  var cards = [];
+  for (var i = 0; i < place.parking.length; i++) {
+    if (place.parking[i].type === type) cards.push(place.parking[i]);
+  }
+  var h = "";
+  for (var i = 0; i < cards.length; i++) {
+    var pk = cards[i];
+    h += '<div class="parking-card">'
+      + '<div class="parking-card-top">'
+      + '<div class="parking-badge '+badgeClass(pk.type)+'">'+pk.type+"</div>"
+      + '<div class="parking-card-name">'+pk.name+'</div>'
+      + '<div style="font-size:12px;color:var(--text-muted)">🚶 '+pk.walk_min+"分钟</div>"
+      + "</div>"
+      + '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;line-height:1.4">📍 '+pk.address+"</div>"
+      + '<div class="parking-tip">💡 <span>'+pk.peak_tip+"</span></div>"
+      + "</div>";
+  }
+  document.getElementById("parking-cards").innerHTML = h;
+}
+
+/* 初始化 */
+renderHomeList(PLACES);
+
+/* ==========================================
+   密码门控
+========================================= */
+var isUnlocked = false; /* 全局解锁标记：false=只读模式 */
+var pwdModal = document.getElementById("pwd-modal");
+var pwdInput = document.getElementById("pwd-input");
+var pwdError = document.getElementById("pwd-error");
+
+function showPwdModal() {
+  if (isUnlocked) { openForm(null); return; } /* 已解锁直接进表单 */
+  pwdError.textContent = "";
+  pwdInput.value = "";
+  pwdModal.classList.add("show");
+  setTimeout(function(){ pwdInput.focus(); }, 100);
+}
+function hidePwdModal() {
+  pwdModal.classList.remove("show");
+}
+function checkPassword() {
+  var v = pwdInput.value.trim();
+  if (v === ADMIN_PASSWORD) {
+    hidePwdModal();
+    isUnlocked = true;
+    openForm(null); /* 新增模式 */
+  } else {
+    pwdError.textContent = "密码错误，请重试";
+    pwdInput.value = "";
+    pwdInput.focus();
+  }
+}
+pwdInput.addEventListener("keydown", function(e) {
+  if (e.keyCode === 13) { e.preventDefault(); checkPassword(); }
+});
+
+/* ==========================================
+   编辑表单
+========================================= */
+var editingId = null; /* null=新增模式, 数字=编辑模式 */
+
+document.getElementById("form-back-btn").addEventListener("click", cancelForm);
+
+function openForm(placeId) {
+  editingId = placeId;
+  var titleText = document.getElementById("form-title-text");
+  var delBtn = document.getElementById("btn-delete");
+
+  /* 渲染设施多选 */
+  var fsEl = document.getElementById("fac-select");
+  var fh = "";
+  for (var i = 0; i < VALID_FACILITIES.length; i++) {
+    fh += '<div class="fac-check" data-fac="'+VALID_FACILITIES[i]+'" onclick="toggleFac(this)">'+emoji(VALID_FACILITIES[i])+' '+VALID_FACILITIES[i]+'</div>';
+  }
+  fsEl.innerHTML = fh;
+
+  if (placeId === null) {
+    /* 新增模式 */
+    titleText.textContent = "添加公园";
+    delBtn.style.display = "none";
+    clearFormFields();
+    addPkItem(); /* 默认一个空停车场行 */
+  } else {
+    /* 编辑模式 */
+    titleText.textContent = "编辑公园";
+    delBtn.style.display = "block";
+    var p = null;
+    for (var i = 0; i < PLACES.length; i++) {
+      if (PLACES[i].id === placeId) { p = PLACES[i]; break; }
+    }
+    if (!p) return;
+    fillFormFields(p);
+  }
+
+  showPage("page-form", "forward");
+}
+
+function clearFormFields() {
+  document.getElementById("f-name").value = "";
+  document.getElementById("f-address").value = "";
+  document.getElementById("f-distance").value = "";
+  document.getElementById("f-cost").value = "";
+  document.getElementById("f-note").value = "";
+  /* 清除设施选中 */
+  var checks = document.querySelectorAll(".fac-check.selected");
+  for (var i = 0; i < checks.length; i++) checks[i].classList.remove("selected");
+  /* 停车场：先清空再添加一行 */
+  renderPkEditor([]);
+  addPkItem();
+}
+
+function fillFormFields(p) {
+  document.getElementById("f-name").value = p.name || "";
+  document.getElementById("f-address").value = p.address || "";
+  document.getElementById("f-distance").value = p.distance || "";
+  document.getElementById("f-cost").value = p.cost || "";
+  document.getElementById("f-note").value = p.note || "";
+  /* 设施选中 */
+  var checks = document.querySelectorAll(".fac-check");
+  for (var i = 0; i < checks.length; i++) {
+    var fn = checks[i].getAttribute("data-fac");
+    if (p.facilities && p.facilities.indexOf(fn) !== -1) {
+      checks[i].classList.add("selected");
+    } else {
+      checks[i].classList.remove("selected");
+    }
+  }
+  /* 停车场 */
+  renderPkEditor(p.parking || []);
+}
+
+/* 设施切换 */
+function toggleFac(el) {
+  el.classList.toggle("selected");
+}
+
+/* ---- 停车场编辑器 ---- */
+function renderPkEditor(parkingList) {
+  var container = document.getElementById("pk-editor");
+  container.innerHTML = "";
+  if (!parkingList || !parkingList.length) return;
+  for (var i = 0; i < parkingList.length; i++) {
+    appendPkRow(parkingList[i]);
+  }
+}
+function appendPkRow(data) {
+  data = data || { type:"P", name:"", address:"", walk_min:"2", peak_tip:"" };
+  var container = document.getElementById("pk-editor");
+  var idx = container.children.length;
+  var row = document.createElement("div");
+  row.className = "pk-item";
+  row.setAttribute("data-pk-idx", idx);
+  row.innerHTML =
+    '<div class="pk-item-top">'
+    + '<span class="pk-item-name">🅿️ 停车场 '+(idx+1)+'</span>'
+    + '<button class="pk-del-btn" onclick="removePkItem(this)">×</button>'
+    + '</div>'
+    + '<div class="pk-field"><input placeholder="停车场名称" value="'+(data.name||'')+'" /></div>'
+    + '<div class="pk-field"><input placeholder="地址" value="'+(data.address||'')+'" /></div>'
+    + '<div style="display:flex;gap:8px">'
+    + '<div class="pk-field" style="flex:1"><input type="number" placeholder="步行(分钟)" value="'+(data.walk_min||'')+'" /></div>'
+    + '</div>'
+    + '<div class="pk-field"><input placeholder="停车提示（高峰建议等）" value="'+(data.peak_tip||'')+'" /></div>';
+  container.appendChild(row);
+}
+function addPkItem() {
+  appendPkRow();
+}
+function removePkItem(btn) {
+  var item = btn.closest(".pk-item");
+  item.remove();
+  /* 重新编号 */
+  var items = document.querySelectorAll("#pk-editor .pk-item");
+  for (var i = 0; i < items.length; i++) {
+    items[i].querySelector(".pk-item-name").textContent = "🅿️ 停车场 "+(i+1);
+  }
+}
+
+/* 收集表单数据 */
+function collectFormData() {
+  var name = document.getElementById("f-name").value.trim();
+  var address = document.getElementById("f-address").value.trim();
+  var distance = document.getElementById("f-distance").value.trim();
+  var cost = document.getElementById("f-cost").value.trim();
+  var note = document.getElementById("f-note").value.trim();
+
+  if (!name) { alert("请输入公园名称"); document.getElementById("f-name").focus(); return null; }
+  if (!address) { alert("请输入地址"); document.getElementById("f-address").focus(); return null; }
+  if (!distance) { alert("请输入距离"); document.getElementById("f-distance").focus(); return null; }
+
+  /* 收集设施 */
+  var facs = [];
+  var selFacs = document.querySelectorAll(".fac-check.selected");
+  for (var i = 0; i < selFacs.length; i++) {
+    facs.push(selFacs[i].getAttribute("data-fac"));
+  }
+
+  /* 收集停车场 */
+  var pkItems = document.querySelectorAll("#pk-editor .pk-item");
+  var parking = [];
+  for (var i = 0; i < pkItems.length; i++) {
+    var inputs = pkItems[i].querySelectorAll("input");
+    var pkName = inputs[0].value.trim();
+    var pkAddr = inputs[1].value.trim();
+    var pkWalk = inputs[2].value.trim() || "2";
+    var pkTip = inputs[3].value.trim();
+    if (!pkName) continue;
+    parking.push({
+      type: "P",
+      name: pkName,
+      address: pkAddr,
+      walk_min: parseInt(pkWalk, 10) || 2,
+      peak_tip: pkTip
+    });
+  }
+
+  return {
+    id: editingId || (Date.now() % 100000),
+    name: name,
+    address: address,
+    distance: distance,
+    cost: cost || "免费",
+    note: note || "",
+    facilities: facs,
+    parking: parking
+  };
+}
+
+/* 保存 */
+function saveForm() {
+  var data = collectFormData();
+  if (!data) return;
+
+  if (editingId !== null) {
+    /* 更新已有记录 */
+    for (var i = 0; i < PLACES.length; i++) {
+      if (PLACES[i].id === editingId) { PLACES[i] = data; break; }
+    }
+  } else {
+    /* 新增 */
+    PLACES.push(data);
+  }
+
+  savePlaces(PLACES);
+  showPage("page-home", "back");
+  renderHomeList(getFilteredPlaces());
+}
+
+/* 删除 */
+function deletePlace() {
+  if (!editingId) return;
+  if (!confirm("确定要删除「"+getPlaceById(editingId).name+"」吗？此操作不可恢复。")) return;
+  var newList = [];
+  for (var i = 0; i < PLACES.length; i++) {
+    if (PLACES[i].id !== editingId) newList.push(PLACES[i]);
+  }
+  PLACES = newList;
+  savePlaces(PLACES);
+  showPage("page-home", "back");
+  renderHomeList(getFilteredPlaces());
+}
+
+/* 取消表单 */
+function cancelForm() {
+  showPage("page-home", "back");
+}
+
+function getPlaceById(id) {
+  for (var i = 0; i < PLACES.length; i++) {
+    if (PLACES[i].id === id) return PLACES[i];
+  }
+  return null;
+}
+
+/* 详情页编辑按钮（和返回按钮同一行，仅已解锁时显示） */
+var _detailRenderOrig = renderDetail;
+renderDetail = function(p) {
+  _detailRenderOrig(p);
+  var editBtn = document.getElementById("detail-edit-btn");
+  if (isUnlocked) {
+    editBtn.style.display = "inline-flex";
+    editBtn.onclick = function() { openForm(p.id); };
+  } else {
+    editBtn.style.display = "none";
+  }
+};
+</script>
+</body>
+</html>
