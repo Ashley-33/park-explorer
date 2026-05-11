@@ -403,7 +403,7 @@
             <div class="logo-sub">今天去哪玩儿呢</div>
           </div>
         </div>
-        <div class="city-chip">📍 北京</div>
+        <div class="city-chip" id="location-status" onclick="locateUser()" style="cursor:pointer" title="点击重新定位">📍 定位中...</div>
         <div class="admin-btn" onclick="showPwdModal()" title="管理">⚙️</div>
       </div>
       <div class="search-bar">
@@ -916,6 +916,67 @@ var PLACES = loadPlaces() || DEFAULT_PLACES;
 /* 首次自动保存默认数据 */
 if (!loadPlaces()) savePlaces(PLACES);
 
+
+/* ==========================================
+   定位 & 距离计算
+========================================= */
+var userLocation = null;
+
+function calcDistance(lat1, lng1, lat2, lng2) {
+  var R = 6371;
+  var dLat = (lat2 - lat1) * Math.PI / 180;
+  var dLng = (lng2 - lng1) * Math.PI / 180;
+  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+          Math.sin(dLng/2) * Math.sin(dLng/2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+function calcAllDistances(places) {
+  if (!userLocation) {
+    for (var i = 0; i < places.length; i++) places[i]._distance = null;
+    return places;
+  }
+  for (var i = 0; i < places.length; i++) {
+    if (places[i].lat && places[i].lng) {
+      places[i]._distance = calcDistance(userLocation.lat, userLocation.lng, places[i].lat, places[i].lng);
+    } else {
+      places[i]._distance = null;
+    }
+  }
+  places.sort(function(a, b) {
+    if (a._distance === null) return 1;
+    if (b._distance === null) return -1;
+    return a._distance - b._distance;
+  });
+  return places;
+}
+
+function locateUser() {
+  var locEl = document.getElementById('location-status');
+  if (!locEl) return;
+  locEl.innerHTML = '<span style="color:var(--orange)">📍 定位中...</span>';
+  if (!navigator.geolocation) { locEl.innerHTML = '<span style="color:var(--park-n)">📍 不支持定位</span>'; return; }
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      locEl.innerHTML = '<span style="color:var(--green-dark)">📍 已定位</span>';
+      renderHomeList(getFilteredPlaces());
+    },
+    function(err) {
+      var msg = '定位失败';
+      if (err.code === 1) msg = '已拒绝定位';
+      else if (err.code === 2) msg = '无法获取位置';
+      else if (err.code === 3) msg = '定位超时';
+      locEl.innerHTML = '<span style="color:var(--park-n)">📍 ' + msg + '</span>';
+      renderHomeList(getFilteredPlaces());
+    },
+    { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
+  );
+}
+setTimeout(function() { locateUser(); }, 2000);
+
 /* 工具函数 */
 function emoji(name) { return facilityEmoji[name] || "✅"; }
 function stars(r) { var s = ""; for(var i=0;i<Math.floor(r);i++) s+="★"; if(r%1>=0.5) s+="½"; return s; }
@@ -947,7 +1008,7 @@ function renderHomeList(places) {
       + '<div class="place-name">'+p.name+'</div>'
       + '<div class="place-cost" style="color:'+costColor+'">'+p.cost+'</div>'
       + '</div></div>'
-      + '<div class="place-address-row">📍 '+p.address+' &nbsp;|&nbsp; 🚶 '+p.distance+' km</div>'
+      + '<div class="place-address-row">📍 '+p.address+' &nbsp;|&nbsp; 🚶 '+(p._distance !== null ? p._distance.toFixed(1) : '?')+' km</div>'
       + (p.note ? '<div class="place-note">💬 '+p.note+'</div>' : '')
       + '<div class="place-facilities">';
     for (var j = 0; j < fac.length; j++) {
@@ -967,7 +1028,7 @@ function renderHomeList(places) {
 /* 筛选逻辑 */
 function getFilteredPlaces() {
   var q = document.getElementById("search-input").value.trim().toLowerCase();
-  var list = PLACES;
+  var list = calcAllDistances(PLACES.slice(0));
   if (currentFilter !== "all") {
     list = list.filter(function(p){ return p.facilities.indexOf(currentFilter) !== -1; });
   }
