@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#2D7A52" />
+  <meta name="theme-color" content="#A5D6A7" />
   <title>遛呗 · 北京</title>
   <style>
     :root {
@@ -88,9 +88,11 @@
     }
     .logo { display: flex; align-items: center; gap: 8px; }
     .logo-icon {
-      width: 36px; height: 36px;
-      border-radius: 10px; overflow: hidden;
+      width: 38px; height: 38px;
+      border-radius: 50%; overflow: hidden;
       display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--green-light);
+      box-shadow: 0 2px 8px rgba(61,139,95,0.12);
     }
     .logo-icon img {
       width: 100%; height: 100%; object-fit: cover;
@@ -336,39 +338,55 @@
     /* ---- 启动画面 ---- */
     .splash-screen {
       position: fixed; inset: 0; z-index: 2000;
-      background: linear-gradient(160deg, var(--green-dark) 0%, #2A6B44 50%, #3D8B5F 100%);
       display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      transition: opacity 0.6s ease, visibility 0.6s ease;
+      align-items: center; justify-content: flex-end;
+      padding-bottom: 18vh;
+      transition: opacity 0.7s ease, visibility 0.7s ease;
+      overflow: hidden;
+    }
+    .splash-screen::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: url('tuotuo.jpg');
+      background-size: cover;
+      background-position: center 20%;
+      filter: brightness(1.02);
+    }
+    .splash-screen::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 50%;
+      background: linear-gradient(to top, rgba(46,125,50,0.75) 0%, rgba(46,125,50,0.25) 60%, transparent 100%);
+      pointer-events: none;
     }
     .splash-screen.hidden {
       opacity: 0; visibility: hidden; pointer-events: none;
     }
-    .splash-avatar {
-      width: 120px; height: 120px; border-radius: 50%;
-      object-fit: cover; border: 4px solid rgba(255,255,255,0.35);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-      animation: splashBounce 1s ease infinite alternate;
-      margin-bottom: 20px;
-    }
-    @keyframes splashBounce {
-      from { transform: translateY(-5px) scale(1); }
-      to   { transform: translateY(5px) scale(1.02); }
-    }
     .splash-title {
-      font-size: 36px; font-weight: 900; color: white;
-      letter-spacing: 4px; margin-bottom: 8px;
+      font-size: 44px; font-weight: 900; color: white;
+      letter-spacing: 8px; margin-bottom: 10px;
+      position: relative; z-index: 1;
+      text-shadow: 0 3px 16px rgba(0,0,0,0.3);
+      animation: splashFadeIn 0.8s ease both;
+      animation-delay: 0.2s;
     }
     .splash-sub {
-      font-size: 14px; color: rgba(255,255,255,0.7);
-      letter-spacing: 1px;
+      font-size: 15px; color: rgba(255,255,255,0.88);
+      letter-spacing: 3px;
+      font-weight: 500;
+      position: relative; z-index: 1;
+      animation: splashFadeIn 0.8s ease both;
+      animation-delay: 0.5s;
+    }
+    @keyframes splashFadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
 <!-- 启动画面 -->
 <div class="splash-screen" id="splash">
-  <img src="tuotuo.jpg" alt="tuotuo" class="splash-avatar" />
   <div class="splash-title">遛呗</div>
   <div class="splash-sub">今天去哪玩儿呢</div>
 </div>
