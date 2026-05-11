@@ -938,6 +938,7 @@ if (!loadPlaces()) savePlaces(PLACES);
    定位 & 距离计算
 ========================================= */
 var userLocation = null;
+var locationFailed = false; /* 定位是否失败（超时/拒绝/不支持）*/
 
 function calcDistance(lat1, lng1, lat2, lng2) {
   var R = 6371;
@@ -974,15 +975,17 @@ function locateUser() {
   var locEl = document.getElementById('location-status');
   if (!locEl) return;
   locEl.innerHTML = '<span style="color:var(--orange)">📍 定位中...</span>';
-  if (!navigator.geolocation) { locEl.innerHTML = '<span style="color:var(--park-n)">📍 不支持定位</span>'; return; }
+  if (!navigator.geolocation) { locEl.innerHTML = '<span style="color:var(--park-n)">📍 不支持定位</span>'; locationFailed = true; return; }
   navigator.geolocation.getCurrentPosition(
     function(pos) {
       userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      locationFailed = false;
       locEl.innerHTML = '<span style="color:var(--green-dark)">📍 已定位</span>';
       renderHomeList(getFilteredPlaces());
     },
     function(err) {
       var msg = '定位失败';
+      locationFailed = true;
       if (err.code === 1) msg = '已拒绝定位';
       else if (err.code === 2) msg = '无法获取位置';
       else if (err.code === 3) msg = '定位超时';
@@ -1045,7 +1048,7 @@ function renderNextBatch() {
       + '<div class="place-name">'+p.name+'</div>'
       + '<div class="place-cost" style="color:'+costColor+'">'+p.cost+'</div>'
       + '</div></div>'
-      + '<div class="place-address-row">📍 '+p.address+' &nbsp;|&nbsp; 🚶 '+(p._distance !== null ? p._distance.toFixed(1) : '?')+' km</div>'
+      + '<div class="place-address-row">📍 '+p.address+(!locationFailed ? ' &nbsp;|&nbsp; 🚶 '+(p._distance !== null ? p._distance.toFixed(1) : '?')+' km' : '')+'</div>'
       + (p.note ? '<div class="place-note">💬 '+p.note+'</div>' : '')
       + '<div class="place-facilities">';
     for (var j = 0; j < fac.length; j++) {
