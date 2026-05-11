@@ -89,9 +89,11 @@
     .logo { display: flex; align-items: center; gap: 8px; }
     .logo-icon {
       width: 36px; height: 36px;
-      background: var(--green-primary); border-radius: 10px;
+      border-radius: 10px; overflow: hidden;
       display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
+    }
+    .logo-icon img {
+      width: 100%; height: 100%; object-fit: cover;
     }
     .logo-text { font-size: 18px; font-weight: 800; color: var(--green-dark); letter-spacing: -0.3px; }
     .logo-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
@@ -334,21 +336,24 @@
     /* ---- 启动画面 ---- */
     .splash-screen {
       position: fixed; inset: 0; z-index: 2000;
-      background: linear-gradient(160deg, var(--green-dark) 0%, #2A6B44 50%, var(--green-primary) 100%);
+      background: linear-gradient(160deg, var(--green-dark) 0%, #2A6B44 50%, #3D8B5F 100%);
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
     }
     .splash-screen.hidden {
       opacity: 0; visibility: hidden; pointer-events: none;
     }
-    .splash-icon {
-      font-size: 64px; margin-bottom: 16px;
-      animation: splashBounce 0.8s ease infinite alternate;
+    .splash-avatar {
+      width: 120px; height: 120px; border-radius: 50%;
+      object-fit: cover; border: 4px solid rgba(255,255,255,0.35);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      animation: splashBounce 1s ease infinite alternate;
+      margin-bottom: 20px;
     }
     @keyframes splashBounce {
-      from { transform: translateY(-4px); }
-      to   { transform: translateY(4px); }
+      from { transform: translateY(-5px) scale(1); }
+      to   { transform: translateY(5px) scale(1.02); }
     }
     .splash-title {
       font-size: 36px; font-weight: 900; color: white;
@@ -363,7 +368,7 @@
 <body>
 <!-- 启动画面 -->
 <div class="splash-screen" id="splash">
-  <div class="splash-icon">🚶</div>
+  <img src="tuotuo.jpg" alt="tuotuo" class="splash-avatar" />
   <div class="splash-title">遛呗</div>
   <div class="splash-sub">今天去哪玩儿呢</div>
 </div>
@@ -374,7 +379,7 @@
     <div class="home-header">
       <div class="header-top">
         <div class="logo">
-          <div class="logo-icon">🚶</div>
+          <div class="logo-icon"><img src="tuotuo.jpg" alt="tuotuo" /></div>
           <div>
             <div class="logo-text">遛呗</div>
             <div class="logo-sub">今天去哪玩儿呢</div>
