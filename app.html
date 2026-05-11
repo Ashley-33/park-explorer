@@ -544,13 +544,48 @@
 /* ==========================================
    常量
 ========================================= */
-var ADMIN_PASSWORD = "123123";
 var VALID_FACILITIES = ["沙坑","游乐设施","戏水区","大草坪","骑行道","树荫"];
 var facilityEmoji = {"沙坑":"🏖️","游乐设施":"🛝","戏水区":"💧","大草坪":"🌱","骑行道":"🚲","树荫":"🌳"};
 
 /* ==========================================
-   数据 & 持久化
+   后端 API（Vercel Serverless）
+   密码验证 + 数据读写均通过后端，前端无敏感信息
 ========================================= */
+var API_BASE = ''; /* 同源部署，空字符串即可 */
+var authToken = null; /* 鉴权成功后获得的 session token */
+
+function apiAuth(password) {
+  return fetch(API_BASE + '/api/auth', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({password: password})
+  }).then(function(r) { return r.json(); });
+}
+
+function apiGetData() {
+  return fetch(API_BASE + '/api/data?t=' + Date.now())
+    .then(function(r) {
+      if (!r.ok) throw new Error('API status ' + r.status);
+      return r.json();
+    });
+}
+
+function apiSaveData(places) {
+  if (!authToken) return Promise.reject(new Error('未登录'));
+  return fetch(API_BASE + '/api/save', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + authToken
+    },
+    body: JSON.stringify({places: places})
+  }).then(function(r) { return r.json(); });
+}
+
+/* ==========================================
+   数据 & 持久化（localStorage 作为离线缓存/降级方案）
+========================================= */
+var DATA_VERSION = 3; /* v3=云端优先模式 */
 function loadPlaces() {
   try {
     var saved = localStorage.getItem("park_places");
@@ -928,21 +963,54 @@ var DEFAULT_PLACES = [
   }
 ];
 
-/* 初始化：优先从 localStorage 加载，否则用默认数据 */
-var DATA_VERSION = 2; /* 数据版本号：1=初始8条, 2=30公园+经纬度+定位 */
-var PLACES = (function() {
-  var saved = loadPlaces();
-  if (!saved) return DEFAULT_PLACES; /* 首次访问 */
-  var storedVer = saved._v || 1;
-  if (storedVer < DATA_VERSION) {
-    /* 旧版本数据 → 升级：用最新的 DEFAULT_PLACES 替换 */
-    return DEFAULT_PLACES;
-  }
-  return saved;
-})();
-PLACES._v = DATA_VERSION;
-savePlaces(PLACES);
+/* 初始化：云端 API 优先，localStorage 降级缓存 */
+var PLACES = [];
+var cloudDataLoaded = false;
 
+function initPlaces() {
+  /* 先用本地缓存渲染（秒开） */
+  var cached = loadPlaces();
+  if (cached && cached.length > 0) {
+    PLACES = cached;
+    PLACES._v = DATA_VERSION;
+  }
+  /* 异步拉取云端最新数据 */
+  apiGetData()
+    .then(function(result) {
+      if (result && result.places && result.places.length > 0) {
+        PLACES = result.places;
+        PLACES._v = DATA_VERSION;
+        cloudDataLoaded = true;
+        savePlaces(PLACES);
+        renderHomeList(getFilteredPlaces());
+      }
+    })
+    .catch(function(err) {
+      console.warn('云端拉取失败，使用本地缓存:', err.message);
+      if (PLACES.length === 0 && document.getElementById("places-list")) {
+        document.getElementById("places-list").innerHTML =
+          '<div class="empty-state"><div class="emoji">📡</div><p>网络连接失败</p><p style="margin-top:6px;font-size:13px;color:var(--text-muted)">请检查网络后刷新页面</p></div>';
+      }
+    });
+}
+
+
+/* ==========================================
+   云端同步
+========================================= */
+function syncToCloud() {
+  if (!authToken) return; /* 未登录不同步 */
+  apiSaveData(PLACES)
+    .then(function(result) {
+      if (result && result.ok) {
+        console.log('云端同步成功 v' + result.version);
+        /* 可以加一个轻量 toast 提示，目前静默即可 */
+      }
+    })
+    .catch(function(err) {
+      console.warn('云端同步失败（本地已保存）:', err.message);
+    });
+}
 
 /* ==========================================
    定位 & 距离计算
@@ -1320,8 +1388,11 @@ function renderParkingCards(place, type) {
   setTimeout(function() { splashReady = true; dataReady = true; dismissSplash(); }, 2500);
 })();
 
-/* 初始渲染（会触发上面的包装函数，自动管理开屏） */
-renderHomeList(getFilteredPlaces());
+/* 初始渲染：先加载本地缓存显示，再异步拉取云端数据更新 */
+if (PLACES.length > 0) {
+  renderHomeList(getFilteredPlaces());
+}
+initPlaces();
 
 /* ==========================================
    密码门控
@@ -1343,15 +1414,24 @@ function hidePwdModal() {
 }
 function checkPassword() {
   var v = pwdInput.value.trim();
-  if (v === ADMIN_PASSWORD) {
-    hidePwdModal();
-    isUnlocked = true;
-    openForm(null); /* 新增模式 */
-  } else {
-    pwdError.textContent = "密码错误，请重试";
-    pwdInput.value = "";
-    pwdInput.focus();
-  }
+  if (!v) { pwdError.textContent = "请输入密码"; return; }
+  /* 调后端 API 验证密码（密码不会暴露在前端代码中） */
+  pwdError.textContent = "验证中...";
+  apiAuth(v).then(function(result) {
+    if (result && result.ok) {
+      authToken = result.token;
+      hidePwdModal();
+      isUnlocked = true;
+      openForm(null); /* 新增模式 */
+    } else {
+      pwdError.textContent = "密码错误，请重试";
+      pwdInput.value = "";
+      setTimeout(function(){ pwdInput.focus(); }, 100);
+    }
+  }).catch(function(err) {
+    pwdError.textContent = "网络错误，请重试";
+    console.error('Auth error:', err);
+  });
 }
 pwdInput.addEventListener("keydown", function(e) {
   if (e.keyCode === 13) { e.preventDefault(); checkPassword(); }
@@ -1544,7 +1624,8 @@ function saveForm() {
     PLACES.push(data);
   }
 
-  savePlaces(PLACES);
+  savePlaces(PLACES); /* 本地缓存 */
+  syncToCloud(); /* 异步同步到云端 */
   showPage("page-home", "back");
   renderHomeList(getFilteredPlaces());
 }
@@ -1558,7 +1639,8 @@ function deletePlace() {
     if (PLACES[i].id !== editingId) newList.push(PLACES[i]);
   }
   PLACES = newList;
-  savePlaces(PLACES);
+  savePlaces(PLACES); /* 本地缓存 */
+  syncToCloud(); /* 异步同步到云端 */
   showPage("page-home", "back");
   renderHomeList(getFilteredPlaces());
 }
