@@ -929,9 +929,19 @@ var DEFAULT_PLACES = [
 ];
 
 /* 初始化：优先从 localStorage 加载，否则用默认数据 */
-var PLACES = loadPlaces() || DEFAULT_PLACES;
-/* 首次自动保存默认数据 */
-if (!loadPlaces()) savePlaces(PLACES);
+var DATA_VERSION = 2; /* 数据版本号：1=初始8条, 2=30公园+经纬度+定位 */
+var PLACES = (function() {
+  var saved = loadPlaces();
+  if (!saved) return DEFAULT_PLACES; /* 首次访问 */
+  var storedVer = saved._v || 1;
+  if (storedVer < DATA_VERSION) {
+    /* 旧版本数据 → 升级：用最新的 DEFAULT_PLACES 替换 */
+    return DEFAULT_PLACES;
+  }
+  return saved;
+})();
+PLACES._v = DATA_VERSION;
+savePlaces(PLACES);
 
 
 /* ==========================================
