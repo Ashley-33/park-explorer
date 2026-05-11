@@ -166,6 +166,23 @@
     .empty-state p { font-size: 15px; }
     .list-bottom-space { height: 24px; }
 
+    /* ---- 瀑布流懒加载 ---- */
+    .load-more-sentinel {
+      text-align: center; padding: 20px 0 30px;
+      color: var(--text-muted); font-size: 13px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      user-select: none;
+    }
+    .load-more-sentinel .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid var(--border);
+      border-top-color: var(--green-primary);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .load-more-sentinel.done { color: var(--green-dark); font-weight: 500; }
+
     /* ---- 详情页 ---- */
     .detail-header {
       background: var(--white); padding: 52px 20px 20px;
@@ -989,16 +1006,36 @@ function hasFree(p)   { return false; }
 var currentFilter = "all";
 var currentParkingType = null;
 
-/* 首页渲染 */
+/* ==========================================
+   瀑布流懒加载
+========================================= */
+var BATCH_SIZE = 8; /* 每批渲染 8 张卡片 */
+var currentBatch = 0;
+var filteredForLazy = []; /* 当前筛选后的完整列表 */
+
 function renderHomeList(places) {
   var c = document.getElementById("places-list");
   if (!places || !places.length) {
     c.innerHTML = '<div class="empty-state"><div class="emoji">🌿</div><p>没有找到包含该设施的地点</p><p style="margin-top:6px;font-size:13px;color:var(--text-muted)">试试切换其他设施筛选</p></div>';
+    hideLoadSentinel();
     return;
   }
-  var html = "";
-  for (var i = 0; i < places.length; i++) {
-    var p = places[i];
+  /* 保存完整列表供懒加载使用 */
+  filteredForLazy = places;
+  currentBatch = 0;
+  /* 渲染第一批 */
+  renderNextBatch();
+}
+
+function renderNextBatch() {
+  var c = document.getElementById("places-list");
+  var start = currentBatch * BATCH_SIZE;
+  var end = Math.min(start + BATCH_SIZE, filteredForLazy.length);
+  if (start === 0) c.innerHTML = ''; /* 首批清空 */
+
+  var html = '';
+  for (var i = start; i < end; i++) {
+    var p = filteredForLazy[i];
     var fac = p.facilities.slice(0, 5);
     var free = hasFree(p);
     var costColor = p.cost === "免费" ? "var(--green-dark)" : "#E67E00";
@@ -1022,8 +1059,77 @@ function renderHomeList(places) {
     html += '<div class="facility-count">🎯 '+p.facilities.length+' 项设施</div>';
     html += '</div></div>';
   }
-  c.innerHTML = html;
+  c.innerHTML += html;
+
+  currentBatch++;
+  updateSentinel();
 }
+
+function getSentinel() {
+  var s = document.getElementById('load-sentinel');
+  if (!s) {
+    s = document.createElement('div');
+    s.id = 'load-sentinel';
+    s.className = 'load-more-sentinel';
+    var parent = document.getElementById("places-list").parentElement;
+    if (parent && document.querySelector(".list-bottom-space")) {
+      parent.insertBefore(s, document.querySelector(".list-bottom-space"));
+    } else if (parent) {
+      parent.appendChild(s);
+    }
+  }
+  return s;
+}
+
+function updateSentinel() {
+  var shown = Math.min(currentBatch * BATCH_SIZE, filteredForLazy.length);
+  var total = filteredForLazy.length;
+  var s = getSentinel();
+  if (shown >= total) {
+    s.className = 'load-more-sentinel done';
+    s.innerHTML = '— 已展示全部 ' + total + ' 个 —';
+  } else {
+    s.className = 'load-more-sentinel';
+    s.innerHTML = '<div class="spinner"></div>已加载 ' + shown + '/' + total + '，下滑加载更多...';
+  }
+}
+
+function hideLoadSentinel() {
+  var s = document.getElementById('load-sentinel');
+  if (s) { s.style.display = 'none'; }
+}
+function showLoadSentinel() {
+  var s = document.getElementById('load-sentinel');
+  if (s) { s.style.display = ''; }
+}
+
+/* 滚动监听：到底部自动加载下一批 */
+(function() {
+  var scrollContainer = null;
+  var ticking = false;
+  function checkScroll() {
+    if (!scrollContainer) {
+      var el = document.querySelector('#page-home .scrollable');
+      if (el) scrollContainer = el; else return;
+    }
+    if (currentBatch * BATCH_SIZE >= filteredForLazy.length) return; /* 已全部加载 */
+    var threshold = 120; /* 距底部 120px 时触发 */
+    if (scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < threshold) {
+      renderNextBatch();
+    }
+    ticking = false;
+  }
+  /* 用事件委托监听首页滚动区 */
+  document.addEventListener('scroll', function(e) {
+    var target = e.target;
+    if (target && target.classList && target.classList.contains('scrollable')) {
+      if (!ticking) {
+        requestAnimationFrame(checkScroll);
+        ticking = true;
+      }
+    }
+  }, true); /* capture 阶段捕获子元素滚动 */
+})();
 
 /* 筛选逻辑 */
 function getFilteredPlaces() {
@@ -1164,14 +1270,45 @@ function renderParkingCards(place, type) {
   document.getElementById("parking-cards").innerHTML = h;
 }
 
-/* 初始化 */
-renderHomeList(PLACES);
-
-/* 启动画面：1.5秒后淡出 */
-setTimeout(function() {
+/* ==========================================
+   智能启动画面
+========================================= */
+(function() {
   var splash = document.getElementById("splash");
-  if (splash) splash.classList.add("hidden");
-}, 1500);
+  var splashReady = false;
+  var dataReady = false;
+
+  function dismissSplash() {
+    if (splashReady && dataReady) {
+      if (splash) splash.classList.add("hidden");
+    }
+  }
+
+  /* 1. 图片预加载完成后标记开屏就绪 */
+  var img = new Image();
+  img.onload = function() { setTimeout(function(){ splashReady = true; dismissSplash(); }, 400); };
+  img.onerror = function() { splashReady = true; dismissSplash(); }; /* 图片失败也不卡住 */
+  img.src = 'tuotuo.jpg';
+
+  /* 2. 首批数据渲染完成（8张卡片）后标记数据就绪 */
+  var _origRenderHomeList = renderHomeList;
+  renderHomeList = function(places) {
+    _origRenderHomeList(places);
+    /* 延迟一帧确保 DOM 写入完毕 */
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        dataReady = true;
+        dismissSplash();
+      });
+    });
+  };
+
+  /* 3. 安全兜底：最晚 2.5 秒后强制消失 */
+  setTimeout(function() { splashReady = true; dataReady = true; dismissSplash(); }, 2500);
+})();
+
+/* 初始渲染（会触发上面的包装函数，自动管理开屏） */
+renderHomeList(getFilteredPlaces());
 
 /* ==========================================
    密码门控
