@@ -1,0 +1,1 @@
+{"version": 2, "builds": [{"src": "api/**", "use": "@vercel/node"}, {"src": "**", "use": "@vercel/static"}], "routes": [{"src": "/api/(.*)", "dest": "/api/$1"}, {"src": "/(.*\\.(js|css|jpg|png|ico|svg|gif|woff|woff2))", "dest": "/$1"}, {"src": "/", "dest": "/app.html"}]}
