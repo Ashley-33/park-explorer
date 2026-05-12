@@ -1360,24 +1360,26 @@ function renderParkingCards(place, type) {
   var splash = document.getElementById("splash");
   var splashReady = false;
   var dataReady = false;
+  var dismissed = false;
 
   function dismissSplash() {
+    if (dismissed) return;
     if (splashReady && dataReady) {
-      if (splash) splash.classList.add("hidden");
+      dismissed = true;
+      if (splash) { splash.classList.add("hidden"); splash.style.display = "none"; }
     }
   }
 
   /* 1. 图片预加载完成后标记开屏就绪 */
   var img = new Image();
-  img.onload = function() { setTimeout(function(){ splashReady = true; dismissSplash(); }, 400); };
-  img.onerror = function() { splashReady = true; dismissSplash(); }; /* 图片失败也不卡住 */
+  img.onload = function() { setTimeout(function(){ splashReady = true; dismissSplash(); }, 300); };
+  img.onerror = function() { splashReady = true; dismissSplash(); };
   img.src = 'tuotuo.jpg';
 
   /* 2. 首批数据渲染完成（8张卡片）后标记数据就绪 */
   var _origRenderHomeList = renderHomeList;
   renderHomeList = function(places) {
     _origRenderHomeList(places);
-    /* 延迟一帧确保 DOM 写入完毕 */
     requestAnimationFrame(function() {
       requestAnimationFrame(function() {
         dataReady = true;
@@ -1386,8 +1388,8 @@ function renderParkingCards(place, type) {
     });
   };
 
-  /* 3. 安全兜底：最晚 2.5 秒后强制消失 */
-  setTimeout(function() { splashReady = true; dataReady = true; dismissSplash(); }, 2500);
+  /* 3. 安全兜底：最晚 1.5 秒后强制消失（移动端网络可能慢） */
+  setTimeout(function() { splashReady = true; dataReady = true; dismissSplash(); }, 1500);
 })();
 
 /* 初始渲染：有缓存用缓存，没缓存用 DEFAULT_PLACES 兜底，确保用户始终能看到内容 */
