@@ -548,44 +548,11 @@ var VALID_FACILITIES = ["沙坑","游乐设施","戏水区","大草坪","骑行�
 var facilityEmoji = {"沙坑":"🏖️","游乐设施":"🛝","戏水区":"💧","大草坪":"🌱","骑行道":"🚲","树荫":"🌳"};
 
 /* ==========================================
-   后端 API（Vercel Serverless）
-   密码验证 + 数据读写均通过后端，前端无敏感信息
+   数据 & 持久化（纯静态方案：硬编码 + localStorage）
 ========================================= */
-var API_BASE = ''; /* 同源部署，空字符串即可 */
-var authToken = null; /* 鉴权成功后获得的 session token */
+var DATA_VERSION = 4; /* v4=纯静态模式 */
+var ADMIN_PASSWORD_LOCAL = "123123"; /* 前端密码验证（仅用于编辑门控，非安全用途） */
 
-function apiAuth(password) {
-  return fetch(API_BASE + '/api/auth', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({password: password})
-  }).then(function(r) { return r.json(); });
-}
-
-function apiGetData() {
-  return fetch(API_BASE + '/api/data?t=' + Date.now())
-    .then(function(r) {
-      if (!r.ok) throw new Error('API status ' + r.status);
-      return r.json();
-    });
-}
-
-function apiSaveData(places) {
-  if (!authToken) return Promise.reject(new Error('未登录'));
-  return fetch(API_BASE + '/api/save', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + authToken
-    },
-    body: JSON.stringify({places: places})
-  }).then(function(r) { return r.json(); });
-}
-
-/* ==========================================
-   数据 & 持久化（localStorage 作为离线缓存/降级方案）
-========================================= */
-var DATA_VERSION = 3; /* v3=云端优先模式 */
 function loadPlaces() {
   try {
     var saved = localStorage.getItem("park_places");
@@ -963,56 +930,8 @@ var DEFAULT_PLACES = [
   }
 ];
 
-/* 初始化：云端 API 优先，localStorage 降级缓存 */
-var PLACES = [];
-var cloudDataLoaded = false;
-
-function initPlaces() {
-  /* 先用本地缓存渲染（秒开） */
-  var cached = loadPlaces();
-  if (cached && cached.length > 0) {
-    PLACES = cached;
-    PLACES._v = DATA_VERSION;
-  }
-  /* 异步拉取云端最新数据 */
-  apiGetData()
-    .then(function(result) {
-      if (result && result.places && result.places.length > 0) {
-        PLACES = result.places;
-        PLACES._v = DATA_VERSION;
-        cloudDataLoaded = true;
-        savePlaces(PLACES);
-        renderHomeList(getFilteredPlaces());
-      }
-    })
-    .catch(function(err) {
-      console.warn('云端拉取失败，使用兜底数据:', err.message);
-      /* API 失败时：优先用本地缓存，没缓存则用 DEFAULT_PLACES 兜底 */
-      if (PLACES.length === 0) {
-        PLACES = DEFAULT_PLACES.slice();
-        savePlaces(PLACES);
-      }
-      renderHomeList(getFilteredPlaces());
-    });
-}
-
-
-/* ==========================================
-   云端同步
-========================================= */
-function syncToCloud() {
-  if (!authToken) return; /* 未登录不同步 */
-  apiSaveData(PLACES)
-    .then(function(result) {
-      if (result && result.ok) {
-        console.log('云端同步成功 v' + result.version);
-        /* 可以加一个轻量 toast 提示，目前静默即可 */
-      }
-    })
-    .catch(function(err) {
-      console.warn('云端同步失败（本地已保存）:', err.message);
-    });
-}
+/* 纯静态模式：直接使用硬编码数据，localStorage 仅用于编辑后的临时缓存 */
+var PLACES = DEFAULT_PLACES.slice();
 
 /* ==========================================
    定位 & 距离计算
@@ -1392,27 +1311,8 @@ function renderParkingCards(place, type) {
   setTimeout(function() { splashReady = true; dataReady = true; dismissSplash(); }, 1500);
 })();
 
-/* 初始渲染：有缓存用缓存，没缓存用 DEFAULT_PLACES 兜底，确保用户始终能看到内容 */
-if (PLACES.length === 0) {
-  PLACES = DEFAULT_PLACES.slice(); /* 新用户兜底 */
-}
+/* 初始渲染：纯静态，直接使用硬编码数据 */
 renderHomeList(getFilteredPlaces());
-initPlaces(); /* 异步拉云端最新数据 */
-
-/* DEBUG: 临时诊断信息（确认后删除） */
-(function() {
-  var dbg = document.createElement('div');
-  dbg.id = '__debug__';
-  dbg.style.cssText = 'position:fixed;top:0;left:0;right:0;background:red;color:white;z-index:99999;padding:4px 8px;font-size:12px;font-family:monospace;pointer-events:none;';
-  document.body.appendChild(dbg);
-  function update() {
-    var el = document.getElementById('places-list');
-    dbg.textContent = 'PLACES=' + PLACES.length + ' | list-child=' + (el ? el.children.length : '?') + ' | splash=' + (document.getElementById('splash') ? document.getElementById('splash').className : '?') + ' | app-h=' + (document.getElementById('app') ? document.getElementById('app').offsetHeight : '?');
-    if (dbg.textContent.indexOf('?') === -1 && PLACES.length > 0) { setTimeout(function() { dbg.remove(); }, 3000); }
-  }
-  update();
-  setInterval(update, 1000);
-})();
 
 /* ==========================================
    密码门控
@@ -1435,23 +1335,16 @@ function hidePwdModal() {
 function checkPassword() {
   var v = pwdInput.value.trim();
   if (!v) { pwdError.textContent = "请输入密码"; return; }
-  /* 调后端 API 验证密码（密码不会暴露在前端代码中） */
-  pwdError.textContent = "验证中...";
-  apiAuth(v).then(function(result) {
-    if (result && result.ok) {
-      authToken = result.token;
-      hidePwdModal();
-      isUnlocked = true;
-      openForm(null); /* 新增模式 */
-    } else {
-      pwdError.textContent = "密码错误，请重试";
-      pwdInput.value = "";
-      setTimeout(function(){ pwdInput.focus(); }, 100);
-    }
-  }).catch(function(err) {
-    pwdError.textContent = "网络错误，请重试";
-    console.error('Auth error:', err);
-  });
+  /* 纯前端密码验证（仅用于编辑门控） */
+  if (v === ADMIN_PASSWORD_LOCAL) {
+    hidePwdModal();
+    isUnlocked = true;
+    openForm(null); /* 新增模式 */
+  } else {
+    pwdError.textContent = "密码错误，请重试";
+    pwdInput.value = "";
+    setTimeout(function(){ pwdInput.focus(); }, 100);
+  }
 }
 pwdInput.addEventListener("keydown", function(e) {
   if (e.keyCode === 13) { e.preventDefault(); checkPassword(); }
@@ -1645,7 +1538,6 @@ function saveForm() {
   }
 
   savePlaces(PLACES); /* 本地缓存 */
-  syncToCloud(); /* 异步同步到云端 */
   showPage("page-home", "back");
   renderHomeList(getFilteredPlaces());
 }
@@ -1660,7 +1552,6 @@ function deletePlace() {
   }
   PLACES = newList;
   savePlaces(PLACES); /* 本地缓存 */
-  syncToCloud(); /* 异步同步到云端 */
   showPage("page-home", "back");
   renderHomeList(getFilteredPlaces());
 }
