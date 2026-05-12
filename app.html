@@ -1399,6 +1399,21 @@ if (PLACES.length === 0) {
 renderHomeList(getFilteredPlaces());
 initPlaces(); /* 异步拉云端最新数据 */
 
+/* DEBUG: 临时诊断信息（确认后删除） */
+(function() {
+  var dbg = document.createElement('div');
+  dbg.id = '__debug__';
+  dbg.style.cssText = 'position:fixed;top:0;left:0;right:0;background:red;color:white;z-index:99999;padding:4px 8px;font-size:12px;font-family:monospace;pointer-events:none;';
+  document.body.appendChild(dbg);
+  function update() {
+    var el = document.getElementById('places-list');
+    dbg.textContent = 'PLACES=' + PLACES.length + ' | list-child=' + (el ? el.children.length : '?') + ' | splash=' + (document.getElementById('splash') ? document.getElementById('splash').className : '?') + ' | app-h=' + (document.getElementById('app') ? document.getElementById('app').offsetHeight : '?');
+    if (dbg.textContent.indexOf('?') === -1 && PLACES.length > 0) { setTimeout(function() { dbg.remove(); }, 3000); }
+  }
+  update();
+  setInterval(update, 1000);
+})();
+
 /* ==========================================
    密码门控
 ========================================= */
