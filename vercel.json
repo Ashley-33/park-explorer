@@ -1,1 +1,0 @@
-{"version": 2, "routes": [{"src": "/api/(.*)", "dest": "/api/$1"}, {"src": "/app.html", "dest": "/app.html"}, {"src": "/(.*\\.(js|css|jpg|png|ico|svg|gif|woff|woff2))", "dest": "/$1"}, {"src": "/", "dest": "/app.html"}]}
