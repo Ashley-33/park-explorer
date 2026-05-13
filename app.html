@@ -893,14 +893,17 @@ function renderAllParkingCards(place) {
   var h = "";
   for (var i = 0; i < place.parking.length; i++) {
     var pk = place.parking[i];
-    var tipHtml = (pk.peak_tip && pk.peak_tip.trim()) ? '<div class="parking-tip">💡 <span>'+pk.peak_tip+"</span></div>" : "";
+    var hasAddress = pk.address && pk.address.trim();
+    var hasTip = pk.peak_tip && pk.peak_tip.trim();
+    var addrHtml = hasAddress ? '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;line-height:1.4">📍 '+pk.address+"</div>" : "";
+    var tipHtml = hasTip ? '<div class="parking-tip">💡 <span>'+pk.peak_tip+"</span></div>" : "";
     h += '<div class="parking-card">'
       + '<div class="parking-card-top">'
       + '<div class="parking-badge '+badgeClass(pk.type)+'">'+pk.type+"</div>"
       + '<div class="parking-card-name">'+pk.name+'</div>'
       + '<div style="font-size:12px;color:var(--text-muted)">🚶 '+pk.walk_min+"分钟</div>"
       + "</div>"
-      + '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;line-height:1.4">📍 '+pk.address+"</div>"
+      + addrHtml
       + tipHtml
       + "</div>";
   }
@@ -923,14 +926,17 @@ function renderParkingCards(place, type) {
   var h = "";
   for (var i = 0; i < cards.length; i++) {
     var pk = cards[i];
-    var tipHtml = (pk.peak_tip && pk.peak_tip.trim()) ? '<div class="parking-tip">💡 <span>'+pk.peak_tip+"</span></div>" : "";
+    var hasAddress = pk.address && pk.address.trim();
+    var hasTip = pk.peak_tip && pk.peak_tip.trim();
+    var addrHtml = hasAddress ? '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;line-height:1.4">📍 '+pk.address+"</div>" : "";
+    var tipHtml = hasTip ? '<div class="parking-tip">💡 <span>'+pk.peak_tip+"</span></div>" : "";
     h += '<div class="parking-card">'
       + '<div class="parking-card-top">'
       + '<div class="parking-badge '+badgeClass(pk.type)+'">'+pk.type+"</div>"
       + '<div class="parking-card-name">'+pk.name+'</div>'
       + '<div style="font-size:12px;color:var(--text-muted)">🚶 '+pk.walk_min+"分钟</div>"
       + "</div>"
-      + '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;line-height:1.4">📍 '+pk.address+"</div>"
+      + addrHtml
       + tipHtml
       + "</div>";
   }
