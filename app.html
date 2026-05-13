@@ -464,7 +464,7 @@
           <div class="section-title">🎯 设施配置</div>
           <div class="facilities-grid" id="detail-facilities"></div>
         </div>
-        <div class="detail-section">
+        <div class="detail-section" id="detail-parking-section">
           <div class="section-title">🚗 停车方案</div>
           <div class="parking-cards" id="parking-cards"></div>
         </div>
@@ -884,9 +884,16 @@ function renderParkingTabs(place, types) {
 }
 
 function renderAllParkingCards(place) {
+  var section = document.getElementById("detail-parking-section");
+  if (!place.parking || place.parking.length === 0) {
+    if (section) section.style.display = "none";
+    return;
+  }
+  if (section) section.style.display = "";
   var h = "";
   for (var i = 0; i < place.parking.length; i++) {
     var pk = place.parking[i];
+    var tipHtml = (pk.peak_tip && pk.peak_tip.trim()) ? '<div class="parking-tip">💡 <span>'+pk.peak_tip+"</span></div>" : "";
     h += '<div class="parking-card">'
       + '<div class="parking-card-top">'
       + '<div class="parking-badge '+badgeClass(pk.type)+'">'+pk.type+"</div>"
@@ -894,7 +901,7 @@ function renderAllParkingCards(place) {
       + '<div style="font-size:12px;color:var(--text-muted)">🚶 '+pk.walk_min+"分钟</div>"
       + "</div>"
       + '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;line-height:1.4">📍 '+pk.address+"</div>"
-      + '<div class="parking-tip">💡 <span>'+pk.peak_tip+"</span></div>"
+      + tipHtml
       + "</div>";
   }
   document.getElementById("parking-cards").innerHTML = h;
@@ -907,9 +914,16 @@ function renderParkingCards(place, type) {
   for (var i = 0; i < place.parking.length; i++) {
     if (place.parking[i].type === type) cards.push(place.parking[i]);
   }
+  var section = document.getElementById("detail-parking-section");
+  if (cards.length === 0) {
+    if (section) section.style.display = "none";
+    return;
+  }
+  if (section) section.style.display = "";
   var h = "";
   for (var i = 0; i < cards.length; i++) {
     var pk = cards[i];
+    var tipHtml = (pk.peak_tip && pk.peak_tip.trim()) ? '<div class="parking-tip">💡 <span>'+pk.peak_tip+"</span></div>" : "";
     h += '<div class="parking-card">'
       + '<div class="parking-card-top">'
       + '<div class="parking-badge '+badgeClass(pk.type)+'">'+pk.type+"</div>"
@@ -917,7 +931,7 @@ function renderParkingCards(place, type) {
       + '<div style="font-size:12px;color:var(--text-muted)">🚶 '+pk.walk_min+"分钟</div>"
       + "</div>"
       + '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;line-height:1.4">📍 '+pk.address+"</div>"
-      + '<div class="parking-tip">💡 <span>'+pk.peak_tip+"</span></div>"
+      + tipHtml
       + "</div>";
   }
   document.getElementById("parking-cards").innerHTML = h;
