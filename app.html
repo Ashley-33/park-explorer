@@ -79,16 +79,16 @@
     /* ---- 首页 Header ---- */
     .home-header {
       background: var(--white);
-      padding: 52px 20px 16px;
+      padding: 44px 16px 12px;
       border-bottom: 1px solid var(--border);
     }
     .header-top {
       display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
     .logo { display: flex; align-items: center; gap: 8px; }
     .logo-icon {
-      width: 38px; height: 38px;
+      width: 34px; height: 34px;
       border-radius: 50%; overflow: hidden;
       display: flex; align-items: center; justify-content: center;
       border: 2px solid var(--green-light);
@@ -97,18 +97,18 @@
     .logo-icon img {
       width: 100%; height: 100%; object-fit: cover;
     }
-    .logo-text { font-size: 18px; font-weight: 800; color: var(--green-dark); letter-spacing: -0.3px; }
-    .logo-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .logo-text { font-size: 17px; font-weight: 800; color: var(--green-dark); letter-spacing: -0.3px; }
+    .logo-sub { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
     .city-chip {
       display: flex; align-items: center; gap: 5px;
-      padding: 6px 12px; background: var(--green-light);
-      border-radius: 20px; font-size: 13px; font-weight: 600;
+      padding: 5px 10px; background: var(--green-light);
+      border-radius: 16px; font-size: 12px; font-weight: 600;
       color: var(--green-dark);
     }
     .search-bar {
-      display: flex; align-items: center; gap: 10px;
+      display: flex; align-items: center; gap: 8px;
       background: var(--bg); border: 1.5px solid var(--border);
-      border-radius: var(--radius-btn); padding: 10px 14px;
+      border-radius: var(--radius-btn); padding: 8px 12px;
     }
     .search-bar input {
       flex: 1; border: none; background: transparent;
@@ -118,7 +118,7 @@
 
     /* ---- 筛选栏 ---- */
     .filter-bar {
-      background: var(--white); padding: 12px 0 12px 20px;
+      background: var(--white); padding: 10px 0 10px 16px;
       border-bottom: 1px solid var(--border);
       overflow-x: auto; display: flex; gap: 8px;
       -webkit-overflow-scrolling: touch; scrollbar-width: none;
@@ -126,29 +126,29 @@
     .filter-bar::-webkit-scrollbar { display: none; }
     .filter-bar::after { content: ''; padding-right: 20px; flex-shrink: 0; }
     .filter-tag {
-      flex-shrink: 0; padding: 6px 14px; border-radius: var(--radius-tag);
-      font-size: 13px; font-weight: 500; cursor: pointer;
+      flex-shrink: 0; padding: 5px 12px; border-radius: var(--radius-tag);
+      font-size: 12px; font-weight: 500; cursor: pointer;
       border: 1.5px solid var(--border); background: var(--white);
       color: var(--text-secondary); transition: all 0.18s ease; user-select: none;
     }
     .filter-tag.active { background: var(--green-primary); border-color: var(--green-primary); color: var(--white); }
 
     /* ---- 地点卡片 ---- */
-    .places-list { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+    .places-list { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
     .place-card {
       background: var(--white); border-radius: var(--radius-card);
-      padding: 18px; box-shadow: var(--shadow); cursor: pointer;
+      padding: 14px; box-shadow: var(--shadow); cursor: pointer;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
       border: 1.5px solid transparent;
     }
     .place-card:active { transform: scale(0.985); box-shadow: var(--shadow-card); border-color: var(--green-light); }
-    .place-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .place-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
     .place-name-row { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
-    .place-name { font-size: 17px; font-weight: 700; color: var(--text-primary); }
+    .place-name { font-size: 16px; font-weight: 700; color: var(--text-primary); }
     .place-cost { font-size: 12px; white-space: nowrap; font-weight: 600; flex-shrink: 0; }
-    .place-address-row { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-    .place-note { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.4; }
-    .place-facilities { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .place-address-row { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .place-note { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4; }
+    .place-facilities { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
     .facility-mini {
       font-size: 12px; padding: 3px 9px;
       background: var(--green-light); color: var(--green-dark);
@@ -156,19 +156,19 @@
     }
     .place-footer {
       display: flex; align-items: center; justify-content: space-between;
-      padding-top: 10px; border-top: 1px solid var(--border);
+      padding-top: 8px; border-top: 1px solid var(--border);
     }
     .parking-hint { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-secondary); }
     .parking-hint.free { color: var(--green-dark); font-weight: 500; }
     .facility-count { font-size: 12px; color: var(--text-muted); }
-    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
-    .empty-state .emoji { font-size: 48px; margin-bottom: 12px; }
+    .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
+    .empty-state .emoji { font-size: 40px; margin-bottom: 10px; }
     .empty-state p { font-size: 15px; }
-    .list-bottom-space { height: 24px; }
+    .list-bottom-space { height: 16px; }
 
     /* ---- 瀑布流懒加载 ---- */
     .load-more-sentinel {
-      text-align: center; padding: 20px 0 30px;
+      text-align: center; padding: 14px 0 24px;
       color: var(--text-muted); font-size: 13px;
       display: flex; align-items: center; justify-content: center; gap: 8px;
       user-select: none;
@@ -185,7 +185,7 @@
 
     /* ---- 详情页 ---- */
     .detail-header {
-      background: var(--white); padding: 52px 20px 20px;
+      background: var(--white); padding: 44px 16px 14px;
       border-bottom: 1px solid var(--border);
     }
     .back-btn {
@@ -195,7 +195,7 @@
     }
     .detail-nav-row {
       display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
     .detail-edit-btn {
       display: inline-flex; align-items: center; gap: 4px;
@@ -203,15 +203,15 @@
       cursor: pointer; padding: 6px 14px; border-radius: 20px;
       background: var(--green-light);
     }
-    .detail-name { font-size: 22px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px; letter-spacing: -0.3px; }
-    .detail-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .detail-name { font-size: 20px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; letter-spacing: -0.3px; }
+    .detail-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
     .detail-address { font-size: 13px; color: var(--text-secondary); display: flex; align-items: flex-start; gap: 4px; line-height: 1.4; }
-    .detail-body { padding: 20px 16px; display: flex; flex-direction: column; gap: 20px; }
+    .detail-body { padding: 14px 12px; display: flex; flex-direction: column; gap: 14px; }
     .detail-section {
       background: var(--white); border-radius: var(--radius-card);
-      padding: 18px; box-shadow: var(--shadow);
+      padding: 14px; box-shadow: var(--shadow);
     }
-    .section-title { font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; }
+    .section-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 10px; }
     .stars { color: #FFB300; font-size: 13px; letter-spacing: 1px; }
     .facilities-grid { display: flex; flex-wrap: wrap; gap: 8px; }
     .facility-tag {
@@ -222,7 +222,7 @@
     }
 
     /* ---- 停车区块 ---- */
-    .parking-tabs { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; scrollbar-width: none; }
+    .parking-tabs { display: flex; gap: 8px; margin-bottom: 10px; overflow-x: auto; scrollbar-width: none; }
     .parking-tabs::-webkit-scrollbar { display: none; }
     .parking-tab {
       display: flex; align-items: center; gap: 6px;
@@ -239,13 +239,13 @@
     .parking-cards { display: flex; flex-direction: column; gap: 10px; }
     .parking-card {
       border: 1.5px solid var(--border); border-radius: 12px;
-      padding: 14px; background: var(--bg);
+      padding: 12px; background: var(--bg);
     }
-    .parking-card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .parking-card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
     .parking-card-name { font-size: 15px; font-weight: 600; color: var(--text-primary); flex: 1; }
     .parking-tip {
       background: #FFFBF0; border: 1px solid #FFE9A0; border-radius: 8px;
-      padding: 8px 10px; font-size: 12px; color: #7A5800;
+      padding: 6px 10px; font-size: 12px; color: #7A5800;
       display: flex; align-items: flex-start; gap: 6px; line-height: 1.5;
     }
 
@@ -862,7 +862,7 @@ function renderDetail(p) {
   if (p.note) {
     var noteEl = document.createElement("div");
     noteEl.id = "detail-note";
-    noteEl.style.cssText = "font-size:13px;color:var(--text-muted);margin-top:6px;display:flex;align-items:flex-start;gap:4px;line-height:1.4";
+    noteEl.style.cssText = "font-size:12px;color:var(--text-muted);margin-top:4px;display:flex;align-items:flex-start;gap:4px;line-height:1.4";
     noteEl.innerHTML = "<span>💬</span><span>"+p.note+"</span>";
     document.getElementById("detail-address").insertAdjacentElement("afterend", noteEl);
   }
@@ -895,7 +895,7 @@ function renderAllParkingCards(place) {
     var pk = place.parking[i];
     var hasAddress = pk.address && pk.address.trim();
     var hasTip = pk.peak_tip && pk.peak_tip.trim();
-    var addrHtml = hasAddress ? '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;line-height:1.4">📍 '+pk.address+"</div>" : "";
+    var addrHtml = hasAddress ? '<div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;line-height:1.4">📍 '+pk.address+"</div>" : "";
     var tipHtml = hasTip ? '<div class="parking-tip">💡 <span>'+pk.peak_tip+"</span></div>" : "";
     h += '<div class="parking-card">'
       + '<div class="parking-card-top">'
@@ -928,7 +928,7 @@ function renderParkingCards(place, type) {
     var pk = cards[i];
     var hasAddress = pk.address && pk.address.trim();
     var hasTip = pk.peak_tip && pk.peak_tip.trim();
-    var addrHtml = hasAddress ? '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;line-height:1.4">📍 '+pk.address+"</div>" : "";
+    var addrHtml = hasAddress ? '<div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;line-height:1.4">📍 '+pk.address+"</div>" : "";
     var tipHtml = hasTip ? '<div class="parking-tip">💡 <span>'+pk.peak_tip+"</span></div>" : "";
     h += '<div class="parking-card">'
       + '<div class="parking-card-top">'
