@@ -3824,7 +3824,7 @@ function showDiceResult(place) {
         + (place.note ? '<div>💬 '+place.note+'</div>' : '')
       +'</div>'
       +'<div class="dice-btn-row">'
-        +'<button class="dice-btn-go" onclick="closeDice();showDetail('+place.id+')">看详情 👀</button>'
+        +'<button class="dice-btn-go" onclick="closeDice();openDetail('+place.id+')">看详情 👀</button>'
         +'<button class="dice-btn-again" onclick="rollDice();">再摇一次 🔄</button>'
       +'</div>'
       +'<div class="dice-close-hint">点击外部关闭</div>'
