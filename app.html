@@ -79,12 +79,12 @@
     /* ---- 首页 Header ---- */
     .home-header {
       background: var(--white);
-      padding: 44px 16px 12px;
+      padding: env(safe-area-inset-top, 20px) 16px 8px;
       border-bottom: 1px solid var(--border);
     }
     .header-top {
       display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
     .logo { display: flex; align-items: center; gap: 8px; }
     .logo-icon {
@@ -108,7 +108,7 @@
     .search-bar {
       display: flex; align-items: center; gap: 8px;
       background: var(--bg); border: 1.5px solid var(--border);
-      border-radius: var(--radius-btn); padding: 8px 12px;
+      border-radius: var(--radius-btn); padding: 7px 12px;
     }
     .search-bar input {
       flex: 1; border: none; background: transparent;
@@ -185,7 +185,7 @@
 
     /* ---- 详情页 ---- */
     .detail-header {
-      background: var(--white); padding: 44px 16px 14px;
+      background: var(--white); padding: env(safe-area-inset-top, 20px) 16px 10px;
       border-bottom: 1px solid var(--border);
     }
     .back-btn {
@@ -195,7 +195,7 @@
     }
     .detail-nav-row {
       display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
     .detail-edit-btn {
       display: inline-flex; align-items: center; gap: 4px;
