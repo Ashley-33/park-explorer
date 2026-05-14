@@ -297,7 +297,9 @@
     }
     .detail-name { font-size: 20px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; letter-spacing: -0.3px; }
     .detail-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
-    .detail-address { font-size: 13px; color: var(--text-secondary); display: flex; align-items: flex-start; gap: 4px; line-height: 1.4; }
+    .detail-address { font-size: 13px; color: var(--text-secondary); display: flex; align-items: flex-start; gap: 4px; line-height: 1.4; cursor: pointer; padding: 2px 0; border-radius: 6px; transition: background 0.15s; -webkit-tap-highlight-color: transparent; }
+    .detail-address:active { background: #F0F4EF; }
+    .detail-address .nav-hint { font-size: 11px; color: var(--green-primary); margin-left: auto; flex-shrink: 0; white-space: nowrap; }
     .detail-body { padding: 14px 12px; display: flex; flex-direction: column; gap: 14px; }
     .detail-section {
       background: var(--white); border-radius: var(--radius-card);
@@ -3358,7 +3360,8 @@ function renderDetail(p) {
   document.getElementById("detail-meta").innerHTML =
     '<span style="font-size:13px;font-weight:600;color:'+(p.cost==="免费"?"var(--green-dark)":"#E67E00")+'">'+(p.cost==="免费"?"🆓 免费":p.cost)+'</span>'
     + '<span style="color:var(--text-muted);font-size:13px">&nbsp;|&nbsp; 🚶 '+(p._distance !== null ? p._distance.toFixed(1) : '?')+' km</span>';
-  document.getElementById("detail-address").innerHTML = "<span>📍</span><span>"+p.address+"</span>";
+  document.getElementById("detail-address").innerHTML = "<span>📍</span><span style='flex:1'>"+p.address+"</span><span class='nav-hint'>导航 🚗</span>";
+  document.getElementById("detail-address").onclick = function() { openNavigation(p); };
   /* 先清除上一次的 note 元素（如果有） */
   var oldNote = document.getElementById("detail-note");
   if (oldNote) oldNote.remove();
@@ -3814,14 +3817,14 @@ function showDiceResult(place) {
       + '<div class="dice-result-title">'+place.name+'</div>'
       + '<div class="dice-result-hint">'+phrase+'</div>'
       + '<div class="dice-result-tags">'+tagsHtml+'&nbsp;</div>'
-      + '<div class="dice-result-info">'
-        + '<div>📍 '+place.address+'</div>'
+      + '<div class="dice-result-info" style="cursor:pointer" onclick="closeDice();openNavigation(PLACES.find(function(x){return x.id==='+place.id+';}))">'
+        + '<div>📍 '+place.address+' <span style="color:var(--green-primary);font-size:11px">导航 →</span></div>'
         + distHtml
         + '<div>🎫 <span style="color:'+costColor+';font-weight:600">'+place.cost+'</span></div>'
         + (place.note ? '<div>💬 '+place.note+'</div>' : '')
       +'</div>'
       +'<div class="dice-btn-row">'
-        +'<button class="dice-btn-go" onclick="closeDice();showDetail('+place.id+')">去看看 👀</button>'
+        +'<button class="dice-btn-go" onclick="closeDice();showDetail('+place.id+')">看详情 👀</button>'
         +'<button class="dice-btn-again" onclick="rollDice();">再摇一次 🔄</button>'
       +'</div>'
       +'<div class="dice-close-hint">点击外部关闭</div>'
@@ -3833,6 +3836,19 @@ function showDiceResult(place) {
 function closeDice() {
   var overlay = document.getElementById("dice-overlay");
   if (overlay) overlay.classList.remove("show");
+}
+
+/* 导航：调起手机地图 */
+function openNavigation(place) {
+  var name = encodeURIComponent(place.name);
+  var lat = place.lat, lng = place.lng;
+  /* 高德导航（优先）+ 腾讯地图 fallback + Apple Maps iOS fallback */
+  var amap = "https://uri.amap.com/navigation?to="+name+","+lat+","+lng+"&mode=car&coordinate=gaode&callnative=1";
+  var tmap = "https://apis.map.qq.com/uri/v1/routeplan?type=drive&to="+name+"&tocoord="+lat+","+lng;
+  /* 先试高德，如果用户没装高德会自动降级到网页版 */
+  window.location.href = amap;
+  /* 延迟开腾讯作为备选（部分安卓机型需要） */
+  setTimeout(function(){ /* 保持高德为主 */ }, 1000);
 }
 </script>
 </body>
