@@ -3843,31 +3843,19 @@ function openNavigation(place) {
   var name = place.name;
   var lat = place.lat, lng = place.lng;
 
-  /* 高德地图 URI Scheme（原生 App） */
-  var amapAndroid = "androidamap://navi?sourceApplication=遛呗&lat="+lat+"&lng="+lng+"&dev=0&poiname="+encodeURIComponent(name)+"&style=2";
-  var amapIos     = "iosamap://navi?sourceApplication=遛呗&lat="+lat+"&lng="+lng+"&dev=0&poiname="+encodeURIComponent(name)+"&style=2";
+  /* 高德路线规划接口（比 navi 接口更可靠，dname 参数稳定支持） */
+  var amapAndroid = "androidamap://route/plan/?dlat="+lat+"&dlon="+lng+"&dname="+encodeURIComponent(name)+"&dev=0&t=0";
+  var amapIos     = "iosamap://route/plan/?dlat="+lat+"&dlon="+lng+"&dname="+encodeURIComponent(name)+"&dev=0&t=0";
 
-  /* 腾讯地图 Universal Link（备选，支持 iOS+Android） */
+  /* 腾讯地图 Universal Link（备选，iOS+Android 都支持） */
   var tmap = "https://apis.map.qq.com/uri/v1/routeplan?type=drive&to="+encodeURIComponent(name)+"&tocoord="+lat+","+lng;
 
-  /* Apple Maps fallback (iOS) */
-  var appleMap = "maps://?q="+encodeURIComponent(name);
-
-  /* Google Maps fallback (Android) */
-  var gmap = "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(lat+","+lng);
-
   var ua = navigator.userAgent || "";
-  var isIOS = /iPad|iPhone|iPod/.test(ua);
-  var isAndroid = /Android/.test(ua);
-
-  if (isIOS) {
-    /* iOS: 先试高德 → 腾讯 → Apple Maps */
+  if (/iPad|iPhone|iPod/.test(ua)) {
     openWithFallback(amapIos, tmap);
-  } else if (isAndroid) {
-    /* Android: 先试高德 → 腾讯 → Google Maps */
+  } else if (/Android/.test(ua)) {
     openWithFallback(amapAndroid, tmap);
   } else {
-    /* 桌面/其他：直接开腾讯网页版 */
     window.open(tmap, "_blank");
   }
 }
