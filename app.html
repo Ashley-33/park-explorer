@@ -162,37 +162,21 @@
       border:none; }
     .place-card:active { transform:scale(.985);box-shadow:var(--sh-card-hover); }
 
-    /* 卡片顶部：名称 + 费用 + 距离导航 */
+    /* 卡片顶部：名称 + 费用 */
     .place-card-head { display:flex;align-items:flex-start;justify-content:space-between;padding:14px 14px 0;gap:10px; }
-    .place-name { font-size:17px;font-weight:700;color:var(--tx-title);letter-spacing:-0.2px;line-height:1.3;flex:1;min-width:0; }
+    .place-name { font-size:16.5px;font-weight:700;color:var(--tx-title);letter-spacing:-0.2px;line-height:1.3;flex:1;min-width:0; }
     .place-cost { font-size:11.5px;white-space:nowrap;font-weight:600;flex-shrink:0;
       padding:2px 9px;border-radius:var(--r-round);border:1.5px solid var(--brand);color:var(--brand);
       background:var(--brand-light);line-height:1.6; }
     .place-cost.paid { border-color:var(--accent-gold);color:var(--accent-gold);background:#FBF6EE; }
 
-    /* 右上距离+导航 */
-    .place-nav-area { text-align:right;flex-shrink:0;padding-top:2px; }
-    .place-dist { font-size:13px;font-weight:600;color:var(--brand); }
-    .place-nav-icon { font-size:15px;color:var(--tx-hint);margin-top:1px; }
-
     /* 地址行 */
     .place-address-row { font-size:12px;color:var(--tx-muted);padding:8px 14px 0;
       display:flex;align-items:center;gap:4px;line-height:1.4; }
 
-    /* 特性标签行（绿色文字小标签） */
-    .place-features { display:flex;flex-wrap:wrap;gap:6px;padding:8px 14px 0; }
-    .feature-chip { font-size:11.5px;color:var(--brand);font-weight:500;background:var(--brand-light);
-      padding:3px 10px;border-radius:var(--r-round);line-height:1.5; }
-
-    /* 图片预览区 */
-    .place-photos { display:flex;gap:6px;padding:10px 14px 0;overflow:hidden; }
-    .place-photo-item { width:calc((100% - 12px) / 3);aspect-ratio:1;border-radius:var(--r);
-      background:linear-gradient(135deg,#E8F5E9 0%,#C8E6C9 50%,#A5D6A7 100%);
-      flex-shrink:0;position:relative;overflow:hidden; }
-    .place-photo-item:nth-child(2) { background:linear-gradient(135deg,#E3F2FD 0%,#BBDEFB 50%,#90CAF9 100%); }
-    .place-photo-item:nth-child(3) { background:linear-gradient(135deg,#FFF3E0 0%,#FFE0B2 0%,#FFCC80 100%); }
-    .place-photo-inner { width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-      font-size:24px;opacity:.45; }
+    /* 备注文字（介绍） */
+    .place-note { font-size:12px;color:var(--tx-secondary);margin:8px 14px 0;line-height:1.65;
+      padding:8px 10px;background:var(--bg);border-radius:var(--r-sm);display:block; }
 
     /* 设施标签（带emoji，彩色） */
     .place-facilities { display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px 0; }
@@ -212,13 +196,13 @@
     .parking-hint { display:flex;align-items:center;gap:4px;font-size:12px;color:var(--tx-secondary);font-weight:450; }
     .parking-hint.free { color:var(--brand);font-weight:600; }
     .facility-count { font-size:11.5px;color:var(--tx-muted);font-weight:450; }
-    .footer-arrow { font-size:14px;color:var(--tx-hint); }
 
-    /* 备注文字 */
-    .place-note { font-size:12px;color:var(--tx-secondary);margin:8px 14px 0;line-height:1.6;
-      padding:8px 10px;background:var(--bg);border-radius:var(--r-sm);display:none; } /* 默认隐藏，详情展开 */
+    /* 备注文字（介绍） */
+    .place-note { font-size:12px;color:var(--tx-secondary);margin:8px 14px 0;line-height:1.65;
+      padding:8px 10px;background:var(--bg);border-radius:var(--r-sm);display:block; }
 
-    .place-size { display:none; } /* 隐藏size */
+    /* 规模信息 */
+    .place-size { font-size:11.5px;color:var(--tx-muted);line-height:1.4;margin:8px 14px 0;padding-left:2px;font-weight:450;display:block; }
 
     .empty-state { text-align:center;padding:56px 20px;color:var(--tx-secondary); }
     .empty-state .emoji { font-size:44px;margin-bottom:12px;opacity:.6; }
@@ -3113,77 +3097,54 @@ function renderNextBatch() {
 
     /* 设施→彩色分类 */
     function facClass(name) {
-      if (name.indexOf('草坪')!==-1||name.indexOf('草')!==-1) return 'f-grass';
-      if (name.indexOf('沙')!==-1) return 'f-sand';
-      if (name.indexOf('水')!==-1||name.indexOf('戏')!==-1) return 'f-water';
-      if (name.indexOf('骑行')!==-1) return 'f-bike';
-      if (name.indexOf('游乐')!==-1||name.indexOf('无动力')!==-1) return 'f-play';
-      if (name.indexOf('树')!==-1||name.indexOf('林')!==-1) return 'f-shade';
+      if (name.indexOf('\u8349\u576e')!==-1||name.indexOf('\u8349')!==-1) return 'f-grass';
+      if (name.indexOf('\u6c99')!==-1) return 'f-sand';
+      if (name.indexOf('\u6c34')!==-1||name.indexOf('\u620f')!==-1) return 'f-water';
+      if (name.indexOf('\u9a91\u884c')!==-1) return 'f-bike';
+      if (name.indexOf('\u6e38\u4e50')!==-1||name.indexOf('\u65e0\u52a8\u529b')!==-1) return 'f-play';
+      if (name.indexOf('\u6811')!==-1||name.indexOf('\u6797')!==-1) return 'f-shade';
       return 'f-default';
     }
 
-    /* 从 note 提取特性标签 */
-    var features = [];
-    if (p.note) {
-      if (p.note.indexOf('草坪')!==-1) features.push('草坪优秀');
-      if (p.note.indexOf('人少')!==-1||p.note.indexOf('安静')!==-1) features.push('人少安静');
-      if (p.note.indexOf('野营')!==-1||p.note.indexOf('露营')!==-1) features.push('适合野营');
-      if (p.note.indexOf('大')!==-1&&p.note.indexOf('面积')!==-1) features.push('面积大');
-      if (features.length === 0 && p.note.length > 10) {
-        /* 取前15字作为概要 */
-        features.push(p.note.substring(0, 14) + '…');
-      }
-    }
-    if (features.length === 0) { features.push('适合遛娃'); }
-
     html += '<div class="place-card" onclick="openDetail('+p.id+')">'
-      /* ===== 头部：名称 + 费用 + 距离导航 ===== */
+      /* ===== 头部：名称 + 费用 ===== */
       + '<div class="place-card-head">'
       + '<div class="place-name">'+p.name+'</div>'
-      + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0">'
       + '<div class="place-cost'+(isFree ? '' : ' paid')+'">'+p.cost+'</div>'
-      + (!locationFailed && p._distance !== null
-        ? '<span class="place-dist">'+p._distance.toFixed(1)+'km</span>'
-        : '')
-      + '</div>'
       + '</div>'
 
-      /* ===== 地址行 ===== */
-      + '<div class="place-address-row">📍 '+p.address+'</div>'
+      /* ===== 地址行 + 距离 ===== */
+      + '<div class="place-address-row">\ud83d\udccd '+p.address+(!locationFailed ? ' &nbsp;|&nbsp; \ud83d\udeb6 '+(p._distance !== null ? p._distance.toFixed(1)+' km' : '') : '')+'</div>'
 
-      /* ===== 特性标签（绿色文字） ===== */
-      + '<div class="place-features">';
-    for (var fi = 0; fi < Math.min(features.length, 3); fi++) {
-      html += '<span class="feature-chip">'+features[fi]+'</span>';
-    }
-    html += '</div>'
-
-      /* ===== 图片预览区（3张占位图） ===== */
-      + '<div class="place-photos">'
-      + '<div class="place-photo-item"><div class="place-photo-inner">🌿</div></div>'
-      + '<div class="place-photo-item"><div class="place-photo-inner">🏞️</div></div>'
-      + '<div class="place-photo-item"><div class="place-photo-inner">🌳</div></div>'
-      + '</div>'
+      /* ===== 介绍文字 ===== */
+      + (p.note ? '<div class="place-note">\ud83d\udcac '+p.note+'</div>' : '')
 
       /* ===== 设施标签（带emoji彩色小标签） ===== */
       + '<div class="place-facilities">';
     for (var j = 0; j < fac.length; j++) {
-      html += '<span class="facility-mini '+facClass(fac[j])+'">'+emoji(fac[j])+' '+displayName(fac[j])+'</span>';
+      if (VALID_FACILITIES.indexOf(fac[j]) !== -1) {
+        html += '<span class="facility-mini '+facClass(fac[j])+'">'+emoji(fac[j])+' '+displayName(fac[j])+'</span>';
+      }
     }
-
     var validCount = fac.filter(function(f){ return VALID_FACILITIES.indexOf(f) !== -1; }).length;
     if (validCount > 5) {
       html += '<span class="facility-mini f-default">+'+(validCount-5)+'</span>';
     }
-    html += '</div>'
+    html += '</div>';
 
-      /* ===== 底部：停车 + 设施数量 + 箭头 ===== */
+      /* ===== 规模信息 ===== */
+    if (p.size) {
+      var sizeText = p.size;
+      var sizeLabel = sizeText.split('\u00b7')[0];
+      var sizeEmoji = sizeLabel.indexOf('\u8d85\u5927')!==-1?'\ud83c\udfd5':sizeLabel.indexOf('\u5927\u578b')!==-1?'\ud83c\udf32':sizeLabel.indexOf('\u4e2d\u578b')!==-1?'\ud83c\udf33':'\ud83c\udf3f';
+      html += '<div class="place-size">'+sizeEmoji+' '+sizeText+'</div>';
+    }
+
+      /* ===== 底部：停车 + 设施数量 ===== */
       + '<div class="place-footer">'
-      + '<div class="parking-hint'+(free?' free':'')+'">🅿️ 停车'+p.parking.length+'</div>'
-      + '<div style="display:flex;align-items:center;gap:6px">'
-      + '<div class="facility-count">🎯 设施'+p.facilities.length+'</div>'
-      + '<span class="footer-arrow">›</span>'
-      + '</div></div></div>';
+      + '<div class="parking-hint'+(free?' free':'')+'">\ud83d\ude97 '+p.parking.length+' \u4e2a\u505c\u8f66\u65b9\u6848</div>'
+      + '<div class="facility-count">\ud83c\udfaf '+p.facilities.length+' \u9879\u8bbe\u65bd</div>'
+      + '</div></div>';
   }
   c.innerHTML += html;
 
