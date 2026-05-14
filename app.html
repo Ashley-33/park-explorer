@@ -3166,7 +3166,7 @@ function locateUser() {
   var locEl = document.getElementById('location-status');
   if (!locEl) return;
   locEl.innerHTML = '<span style="color:#FFF">📍 定位中...</span>';
-  if (!navigator.geolocation) { locEl.innerHTML = '<span style="color:#FFCDD2">📍 不支持定位</span>'; locationFailed = true; return; }
+  if (!navigator.geolocation) { locEl.innerHTML = '<span style="color:#FFE0E0">📍 不支持定位</span>'; locationFailed = true; return; }
   navigator.geolocation.getCurrentPosition(
     function(pos) {
       userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
@@ -3180,7 +3180,7 @@ function locateUser() {
       if (err.code === 1) msg = '已拒绝定位';
       else if (err.code === 2) msg = '无法获取位置';
       else if (err.code === 3) msg = '定位超时';
-      locEl.innerHTML = '<span style="color:#FFCDD2">📍 ' + msg + '</span>';
+      locEl.innerHTML = '<span style="color:#FFE0E0">📍 ' + msg + '</span>';
       renderHomeList(getFilteredPlaces());
     },
     { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
