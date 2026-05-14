@@ -603,7 +603,9 @@ function showLoadErrorState(isRetrying) {
 }
 
 function loadPlaces() {
-  return fetch('data.json')
+  /* 加时间戳防止缓存 */
+  var ts = '?t=' + Date.now();
+  return fetch('data.json' + ts)
     .then(function(r) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
