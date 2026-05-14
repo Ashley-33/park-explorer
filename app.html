@@ -3053,7 +3053,7 @@ var filteredForLazy = []; /* 当前筛选后的完整列表 */
 function renderHomeList(places) {
   var c = document.getElementById("places-list");
   if (!places || !places.length) {
-    c.innerHTML = '<div class="empty-state"><div class="emoji">🌿</div><p>没有找到包含该设施的地点</p><p style="margin-top:6px;font-size:13px;color:var(--text-muted)">试试切换其他设施筛选</p></div>';
+    c.innerHTML = '<div class="empty-state"><div class="emoji">🌿</div><p>没有找到包含该设施的地点</p><p style="margin-top:6px;font-size:13px;color:var(--tx-muted)">试试切换其他设施筛选</p></div>';
     hideLoadSentinel();
     return;
   }
@@ -3075,7 +3075,7 @@ function renderNextBatch() {
     var p = filteredForLazy[i];
     var fac = p.facilities.slice(0, 5);
     var free = hasFree(p);
-    var costColor = p.cost === "免费" ? "var(--green-dark)" : "#E67E00";
+    var costColor = p.cost === "免费" ? "var(--fog-dark)" : "#E67E00";
     var costBorder = p.cost === "免费" ? "rgba(56,142,60,0.4)" : "rgba(230,126,0,0.4)";
     html += '<div class="place-card" onclick="openDetail('+p.id+')">'
       + '<div class="place-card-top">'
@@ -3099,7 +3099,7 @@ function renderNextBatch() {
     }
     var validCount = fac.filter(function(f){ return VALID_FACILITIES.indexOf(f) !== -1; }).length;
     if (validCount > 5) {
-      html += '<span class="facility-mini" style="color:var(--text-muted)">+'+(validCount-5)+'</span>';
+      html += '<span class="facility-mini" style="color:var(--tx-muted)">+'+(validCount-5)+'</span>';
     }
     html += '</div>';
     if (p.size) {
@@ -3307,13 +3307,13 @@ function renderAllParkingCards(place) {
     var pk = place.parking[i];
     var hasAddress = pk.address && pk.address.trim();
     var hasTip = pk.peak_tip && pk.peak_tip.trim();
-    var addrHtml = hasAddress ? '<div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;line-height:1.4">📍 '+pk.address+"</div>" : "";
+    var addrHtml = hasAddress ? '<div style="font-size:12px;color:var(--tx-secondary);margin-bottom:8px;line-height:1.4">📍 '+pk.address+"</div>" : "";
     var tipHtml = hasTip ? '<div class="parking-tip">💡 <span>'+pk.peak_tip+"</span></div>" : "";
     h += '<div class="parking-card">'
       + '<div class="parking-card-top">'
       + '<div class="parking-badge '+badgeClass(pk.type)+'">'+pk.type+"</div>"
       + '<div class="parking-card-name">'+pk.name+'</div>'
-      + '<div style="font-size:12px;color:var(--text-muted)">🚶 '+pk.walk_min+"分钟</div>"
+      + '<div style="font-size:12px;color:var(--tx-muted)">🚶 '+pk.walk_min+"分钟</div>"
       + "</div>"
       + addrHtml
       + tipHtml
@@ -3340,13 +3340,13 @@ function renderParkingCards(place, type) {
     var pk = cards[i];
     var hasAddress = pk.address && pk.address.trim();
     var hasTip = pk.peak_tip && pk.peak_tip.trim();
-    var addrHtml = hasAddress ? '<div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;line-height:1.4">📍 '+pk.address+"</div>" : "";
+    var addrHtml = hasAddress ? '<div style="font-size:12px;color:var(--tx-secondary);margin-bottom:8px;line-height:1.4">📍 '+pk.address+"</div>" : "";
     var tipHtml = hasTip ? '<div class="parking-tip">💡 <span>'+pk.peak_tip+"</span></div>" : "";
     h += '<div class="parking-card">'
       + '<div class="parking-card-top">'
       + '<div class="parking-badge '+badgeClass(pk.type)+'">'+pk.type+"</div>"
       + '<div class="parking-card-name">'+pk.name+'</div>'
-      + '<div style="font-size:12px;color:var(--text-muted)">🚶 '+pk.walk_min+"分钟</div>"
+      + '<div style="font-size:12px;color:var(--tx-muted)">🚶 '+pk.walk_min+"分钟</div>"
       + "</div>"
       + addrHtml
       + tipHtml
@@ -3707,11 +3707,11 @@ function showDiceResult(place) {
   });
   var tagsHtml = validFacs.map(function(f){
     var tc = '', bg = '';
-    if (f === '沙坑') { tc = '#9A6500'; bg = 'var(--fac-sand-bg)'; }
-    else if (f === '无动力') { tc = '#C2185B'; bg = 'var(--fac-play-bg)'; }
-    else if (f === '戏水区') { tc = '#1565C0'; bg = 'var(--fac-water-bg)'; }
-    else if (f === '大草坪') { tc = '#2E7D32'; bg = 'var(--fac-lawn-bg)'; }
-    else if (f === '骑行道') { tc = '#7B1FA2'; bg = 'var(--fac-bike-bg)'; }
+    if (f === '沙坑') { tc = '#9A6500'; bg = '#FEF3DB'; }
+    else if (f === '无动力') { tc = '#C2185B'; bg = '#FDE8F1'; }
+    else if (f === '戏水区') { tc = '#1565C0'; bg = '#E3F2FD'; }
+    else if (f === '大草坪') { tc = '#2E7D32'; bg = '#E8F5E9'; }
+    else if (f === '骑行道') { tc = '#7B1FA2'; bg = '#F3E5F5'; }
     return '<span class="dice-result-tag" style="background:'+bg+';color:'+tc+'">'+emoji(f)+' '+displayName(f)+'</span>';
   }).join("");
 
@@ -3719,8 +3719,8 @@ function showDiceResult(place) {
   if (place._distance !== null && place._distance !== undefined)
     distHtml = '<div>🚶 距离你约 <b>' + place._distance.toFixed(1) + '</b> km</div>';
 
-  var costColor = place.cost.indexOf("免费")!==-1 ? 'var(--green-primary)' :
-                  place.cost.indexOf("门票")!==-1 ? 'var(--park-n)' : 'var(--text-secondary)';
+  var costColor = place.cost.indexOf("免费")!==-1 ? 'var(--c-free)' :
+                  place.cost.indexOf("门票")!==-1 ? 'var(--c-park-n)' : 'var(--tx-secondary)';
 
   overlay.innerHTML =
     '<div class="dice-result" onclick="event.stopPropagation()">'
@@ -3729,7 +3729,7 @@ function showDiceResult(place) {
       + '<div class="dice-result-hint">'+phrase+'</div>'
       + '<div class="dice-result-tags">'+tagsHtml+'&nbsp;</div>'
       + '<div class="dice-result-info" style="cursor:pointer" onclick="closeDice();openNavigation(PLACES.find(function(x){return x.id==='+place.id+';}))">'
-        + '<div>📍 '+place.address+' <span style="color:var(--green-primary);font-size:11px">导航 →</span></div>'
+        + '<div>📍 '+place.address+' <span style="color:var(--fog-green);font-size:11px">导航 →</span></div>'
         + distHtml
         + '<div>🎫 <span style="color:'+costColor+';font-weight:600">'+place.cost+'</span></div>'
         + (place.size ? '<div>📐 '+place.size+'</div>' : '')
