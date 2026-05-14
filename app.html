@@ -570,21 +570,10 @@ var VALID_FACILITIES = ["沙坑","游乐设施","戏水区","大草坪","骑行�
 var facilityEmoji = {"沙坑":"🏖️","游乐设施":"🛝","戏水区":"💧","大草坪":"🌱","骑行道":"🚲","树荫":"🌳","景观绿地":"🌿","野趣树林":"🌲","白沙滩":"🏖️","儿童游乐区":"🛝","小型沙坑":"🏖️","健身设施":"🏋️","休闲绿地":"🌿","梯田":"🌾","稻田":"🌾","观景台":"🔭","水系":"💧","栈道":"🪵","滨水景观":"🏞️","露营地":"⛺","平缓木栈道":"🪵","溪流":"💧","溯溪":"🌊","环山木栈道":"🥾","山林绿植":"🌲"};
 
 /* ==========================================
-   数据 & 持久化（纯静态方案：硬编码 + localStorage）
+   数据 & 持久化
 ========================================= */
 var DATA_VERSION = 4; /* v4=纯静态模式 */
 var ADMIN_PASSWORD_LOCAL = "123123"; /* 前端密码验证（仅用于编辑门控，非安全用途） */
-
-function loadPlaces() {
-  try {
-    var saved = localStorage.getItem("park_places");
-    if (saved) return JSON.parse(saved);
-  } catch(e) {}
-  return null;
-}
-function savePlaces(data) {
-  localStorage.setItem("park_places", JSON.stringify(data));
-}
 
 /* 数据加载（从 data.json 异步获取，带自动重试） */
 var PLACES = [];
