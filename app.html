@@ -119,6 +119,73 @@
     }
     .search-bar input::placeholder { color: var(--text-muted); }
 
+    /* ---- 随机推荐骰子 ---- */
+    .dice-btn {
+      font-size: 20px; cursor: pointer; flex-shrink: 0;
+      transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+      user-select: none; -webkit-tap-highlight-color: transparent;
+      animation: dice-idle 2.5s ease-in-out infinite;
+    }
+    .dice-btn:active { transform: scale(0.85); }
+    .dice-btn.rolling { animation: dice-roll 0.7s ease-out; }
+    @keyframes dice-idle {
+      0%,100% { transform: rotate(0deg); }
+      25% { transform: rotate(-8deg); }
+      75% { transform: rotate(8deg); }
+    }
+    @keyframes dice-roll {
+      0% { transform: rotate(0deg) scale(1); }
+      20% { transform: rotate(120deg) scale(1.15); }
+      40% { transform: rotate(240deg) scale(1.15); }
+      60% { transform: rotate(360deg) scale(1.1); }
+      80% { transform: rotate(420deg) scale(1.05); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+
+    /* ---- 随机推荐弹窗 ---- */
+    .dice-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.45); z-index: 900;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .dice-overlay.show { opacity: 1; pointer-events: auto; }
+    .dice-result {
+      width: 86%; max-width: 360px; background: var(--white);
+      border-radius: 24px; padding: 28px 24px 24px;
+      text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+      transform: translateY(30px) scale(0.9);
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .dice-overlay.show .dice-result { transform: translateY(0) scale(1); }
+    .dice-result-emoji { font-size: 48px; margin-bottom: 8px; display: block; animation: bounce-in 0.6s ease both; }
+    .dice-result-title { font-size: 22px; font-weight: 700; color: var(--green-dark); margin-bottom: 4px; }
+    .dice-result-hint { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+    .dice-result-tags { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; min-height: 26px; }
+    .dice-result-tag {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      background: var(--green-light); color: var(--green-primary);
+      font-size: 12px; font-weight: 500;
+    }
+    .dice-result-info { text-align: left; font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px; padding: 12px; background: var(--bg); border-radius: 12px; }
+    .dice-result-info div { margin-bottom: 2px; }
+    .dice-btn-row { display: flex; gap: 10px; }
+    .dice-btn-row button {
+      flex: 1; padding: 11px 0; border-radius: 12px; font-size: 14px;
+      font-weight: 600; cursor: pointer; border: none; transition: all 0.15s ease;
+    }
+    .dice-btn-go { background: var(--green-primary); color: white; }
+    .dice-btn-go:active { background: var(--green-dark); transform: scale(0.97); }
+    .dice-btn-again { background: #F0F4EF; color: var(--text-secondary); }
+    .dice-btn-again:active { background: #E4ECE5; transform: scale(0.97); }
+    .dice-close-hint { font-size: 11px; color: var(--text-muted); margin-top: 12px; }
+    @keyframes bounce-in {
+      0% { transform: scale(0) rotate(-15deg); opacity: 0; }
+      60% { transform: scale(1.25) rotate(5deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
     /* ---- 筛选栏 ---- */
     .filter-bar {
       background: var(--white); padding: 8px 0 8px 16px;
@@ -451,6 +518,7 @@
       <div class="search-bar">
         <span style="font-size:16px;color:var(--text-muted)">🔍</span>
         <input type="text" placeholder="搜索公园、设施..." id="search-input" />
+        <div class="dice-btn" id="dice-btn" onclick="rollDice()">🎲</div>
       </div>
     </div>
 
@@ -1327,6 +1395,88 @@ renderDetail = function(p) {
     editBtn.style.display = "none";
   }
 };
+
+/* ==========================================
+   🎲 随机推荐（不知道去哪）
+========================================= */
+var dicePhrases = [
+  "今天就去这里吧！🌟",
+  "运气不错，试试这个！✨",
+  "这个选择很靠谱！💪",
+  "走起，别犹豫！🏃",
+  "今日份好运已送达 🍀",
+  "这个公园会给你惊喜的！🎁",
+];
+var diceEmojis = ["🎲","🎯","🌈","⭐","🍀","🎪","🎢","🏞️"];
+
+function rollDice() {
+  var btn = document.getElementById("dice-btn");
+  btn.classList.add("rolling");
+  setTimeout(function() { btn.classList.remove("rolling"); }, 700);
+
+  if (!PLACES || PLACES.length === 0) return;
+
+  /* 稍等骰子转完再弹 */
+  setTimeout(function() {
+    var idx = Math.floor(Math.random() * PLACES.length);
+    showDiceResult(PLACES[idx]);
+  }, 500);
+}
+
+function showDiceResult(place) {
+  var overlay = document.getElementById("dice-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "dice-overlay";
+    overlay.className = "dice-overlay";
+    overlay.onclick = function(e) { if (e.target === overlay) closeDice(); };
+    document.body.appendChild(overlay);
+  }
+
+  var phrase = dicePhrases[Math.floor(Math.random() * dicePhrases.length)];
+  var demoji = diceEmojis[Math.floor(Math.random() * diceEmojis.length)];
+
+  /* 只显示标准标签 */
+  var validFacs = (place.facilities||[]).filter(function(f){
+    return VALID_FACILITIES.indexOf(f) !== -1;
+  });
+  var tagsHtml = validFacs.map(function(f){
+    return '<span class="dice-result-tag">'+emoji(f)+' '+displayName(f)+'</span>';
+  }).join("");
+
+  var distHtml = "";
+  if (place._distance !== null && place._distance !== undefined)
+    distHtml = '<div>🚶 距离你约 <b>' + place._distance.toFixed(1) + '</b> km</div>';
+
+  var costColor = place.cost.indexOf("免费")!==-1 ? 'var(--green-primary)' :
+                  place.cost.indexOf("门票")!==-1 ? 'var(--park-n)' : 'var(--text-secondary)';
+
+  overlay.innerHTML =
+    '<div class="dice-result" onclick="event.stopPropagation()">'
+      + '<span class="dice-result-emoji">'+demoji+'</span>'
+      + '<div class="dice-result-title">'+place.name+'</div>'
+      + '<div class="dice-result-hint">'+phrase+'</div>'
+      + '<div class="dice-result-tags">'+tagsHtml+'&nbsp;</div>'
+      + '<div class="dice-result-info">'
+        + '<div>📍 '+place.address+'</div>'
+        + distHtml
+        + '<div>🎫 <span style="color:'+costColor+';font-weight:600">'+place.cost+'</span></div>'
+        + (place.note ? '<div>💬 '+place.note+'</div>' : '')
+      +'</div>'
+      +'<div class="dice-btn-row">'
+        +'<button class="dice-btn-go" onclick="closeDice();showDetail('+place.id+')">去看看 👀</button>'
+        +'<button class="dice-btn-again" onclick="rollDice();">再摇一次 🔄</button>'
+      +'</div>'
+      +'<div class="dice-close-hint">点击外部关闭</div>'
+    +'</div>';
+
+  requestAnimationFrame(function(){ overlay.classList.add("show"); });
+}
+
+function closeDice() {
+  var overlay = document.getElementById("dice-overlay");
+  if (overlay) overlay.classList.remove("show");
+}
 </script>
 </body>
 </html>
