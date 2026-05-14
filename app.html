@@ -569,6 +569,9 @@
    常量
 ========================================= */
 var VALID_FACILITIES = ["沙坑","无动力","戏水区","大草坪","骑行道"];
+/* 设施显示名称映射（筛选栏/卡片/详情页统一使用短名） */
+var facilityDisplayNames = {"沙坑":"沙坑","无动力":"无动力","戏水区":"戏水","大草坪":"草坪","骑行道":"骑行"};
+function displayName(f) { return facilityDisplayNames[f] || f; }
 var facilityEmoji = {"沙坑":"🏖️","游乐设施":"🛝","戏水区":"💧","大草坪":"🌱","骑行道":"🚲","树荫":"🌳","景观绿地":"🌿","野趣树林":"🌲","白沙滩":"🏖️","儿童游乐区":"🛝","小型沙坑":"🏖️","健身设施":"🏋️","休闲绿地":"🌿","梯田":"🌾","稻田":"🌾","观景台":"🔭","水系":"💧","栈道":"🪵","滨水景观":"🏞️","露营地":"⛺","平缓木栈道":"🪵","溪流":"💧","溯溪":"🌊","环山木栈道":"🥾","山林绿植":"🌲"};
 
 /* ==========================================
@@ -775,7 +778,7 @@ function renderNextBatch() {
       + (p.note ? '<div class="place-note">💬 '+p.note+'</div>' : '')
       + '<div class="place-facilities">';
     for (var j = 0; j < fac.length; j++) {
-      html += '<span class="facility-mini">'+emoji(fac[j])+' '+fac[j]+'</span>';
+      html += '<span class="facility-mini">'+emoji(fac[j])+' '+displayName(fac[j])+'</span>';
     }
     if (p.facilities.length > 5) {
       html += '<span class="facility-mini" style="color:var(--text-muted)">+'+(p.facilities.length-5)+'</span>';
@@ -943,7 +946,7 @@ function renderDetail(p) {
   // 设施
   var fhtml = "";
   for (var i = 0; i < p.facilities.length; i++) {
-    fhtml += '<div class="facility-tag">'+emoji(p.facilities[i])+" "+p.facilities[i]+"</div>";
+    fhtml += '<div class="facility-tag">'+emoji(p.facilities[i])+" "+displayName(p.facilities[i])+"</div>";
   }
   document.getElementById("detail-facilities").innerHTML = fhtml;
 
@@ -1109,7 +1112,7 @@ function openForm(placeId) {
   var fsEl = document.getElementById("fac-select");
   var fh = "";
   for (var i = 0; i < VALID_FACILITIES.length; i++) {
-    fh += '<div class="fac-check" data-fac="'+VALID_FACILITIES[i]+'" onclick="toggleFac(this)">'+emoji(VALID_FACILITIES[i])+' '+VALID_FACILITIES[i]+'</div>';
+    fh += '<div class="fac-check" data-fac="'+VALID_FACILITIES[i]+'" onclick="toggleFac(this)">'+emoji(VALID_FACILITIES[i])+' '+displayName(VALID_FACILITIES[i])+'</div>';
   }
   fsEl.innerHTML = fh;
 
