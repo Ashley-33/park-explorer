@@ -121,15 +121,15 @@
 
     /* ---- 筛选栏 ---- */
     .filter-bar {
-      background: var(--white); padding: 10px 0 10px 16px;
+      background: var(--white); padding: 8px 0 8px 16px;
       border-bottom: 1px solid var(--border);
-      overflow-x: auto; display: flex; gap: 8px;
+      overflow-x: auto; display: flex; gap: 6px;
       -webkit-overflow-scrolling: touch; scrollbar-width: none;
     }
     .filter-bar::-webkit-scrollbar { display: none; }
     .filter-bar::after { content: ''; padding-right: 20px; flex-shrink: 0; }
     .filter-tag {
-      flex-shrink: 0; padding: 5px 12px; border-radius: var(--radius-tag);
+      flex-shrink: 0; padding: 4px 10px; border-radius: var(--radius-tag);
       font-size: 12px; font-weight: 500; cursor: pointer;
       border: 1.5px solid var(--border); background: var(--white);
       color: var(--text-secondary); transition: all 0.18s ease; user-select: none;
@@ -457,11 +457,11 @@
     <!-- 设施筛选栏 -->
     <div class="filter-bar" id="filter-bar">
       <div class="filter-tag active" data-filter="all">全部</div>
-      <div class="filter-tag" data-filter="沙坑">🏖️ 沙坑</div>
-      <div class="filter-tag" data-filter="游乐设施">🛝 游乐设施</div>
-      <div class="filter-tag" data-filter="戏水区">💧 戏水区</div>
-      <div class="filter-tag" data-filter="大草坪">🌱 大草坪</div>
-      <div class="filter-tag" data-filter="骑行道">🚲 骑行道</div>
+      <div class="filter-tag" data-filter="沙坑">沙坑</div>
+      <div class="filter-tag" data-filter="无动力">无动力</div>
+      <div class="filter-tag" data-filter="戏水区">戏水</div>
+      <div class="filter-tag" data-filter="大草坪">草坪</div>
+      <div class="filter-tag" data-filter="骑行道">骑行</div>
     </div>
 
     <!-- 地点列表 -->
@@ -568,7 +568,7 @@
 /* ==========================================
    常量
 ========================================= */
-var VALID_FACILITIES = ["沙坑","游乐设施","戏水区","大草坪","骑行道"];
+var VALID_FACILITIES = ["沙坑","无动力","戏水区","大草坪","骑行道"];
 var facilityEmoji = {"沙坑":"🏖️","游乐设施":"🛝","戏水区":"💧","大草坪":"🌱","骑行道":"🚲","树荫":"🌳","景观绿地":"🌿","野趣树林":"🌲","白沙滩":"🏖️","儿童游乐区":"🛝","小型沙坑":"🏖️","健身设施":"🏋️","休闲绿地":"🌿","梯田":"🌾","稻田":"🌾","观景台":"🔭","水系":"💧","栈道":"🪵","滨水景观":"🏞️","露营地":"⛺","平缓木栈道":"🪵","溪流":"💧","溯溪":"🌊","环山木栈道":"🥾","山林绿植":"🌲"};
 
 /* ==========================================
