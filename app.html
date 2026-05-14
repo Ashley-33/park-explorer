@@ -778,10 +778,12 @@ function renderNextBatch() {
       + (p.note ? '<div class="place-note">💬 '+p.note+'</div>' : '')
       + '<div class="place-facilities">';
     for (var j = 0; j < fac.length; j++) {
-      html += '<span class="facility-mini">'+emoji(fac[j])+' '+displayName(fac[j])+'</span>';
+      if (VALID_FACILITIES.indexOf(fac[j]) !== -1)
+        html += '<span class="facility-mini">'+emoji(fac[j])+' '+displayName(fac[j])+'</span>';
     }
-    if (p.facilities.length > 5) {
-      html += '<span class="facility-mini" style="color:var(--text-muted)">+'+(p.facilities.length-5)+'</span>';
+    var validCount = fac.filter(function(f){ return VALID_FACILITIES.indexOf(f) !== -1; }).length;
+    if (validCount > 5) {
+      html += '<span class="facility-mini" style="color:var(--text-muted)">+'+(validCount-5)+'</span>';
     }
     html += '</div><div class="place-footer">';
     html += '<div class="parking-hint'+(free?' free':'')+'">🚗 '+p.parking.length+' 个停车方案'+(free?'（含免费）':'')+'</div>';
@@ -946,7 +948,8 @@ function renderDetail(p) {
   // 设施
   var fhtml = "";
   for (var i = 0; i < p.facilities.length; i++) {
-    fhtml += '<div class="facility-tag">'+emoji(p.facilities[i])+" "+displayName(p.facilities[i])+"</div>";
+    if (VALID_FACILITIES.indexOf(p.facilities[i]) !== -1)
+      fhtml += '<div class="facility-tag">'+emoji(p.facilities[i])+" "+displayName(p.facilities[i])+"</div>";
   }
   document.getElementById("detail-facilities").innerHTML = fhtml;
 
