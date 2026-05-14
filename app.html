@@ -249,11 +249,11 @@
     }
     .facility-mini:hover { transform: scale(1.05); }
     /* 设施多彩色 */
-    .fac-sand { background: var(--fac-sand-bg); color: #9A6500; border: 1px solid rgba(232,168,82,0.3); }
-    .fac-play { background: var(--fac-play-bg); color: #C2185B; border: 1px solid rgba(224,102,145,0.3); }
-    .fac-water { background: var(--fac-water-bg); color: #1565C0; border: 1px solid rgba(66,165,245,0.3); }
-    .fac-lawn { background: var(--fac-lawn-bg); color: #2E7D32; border: 1px solid rgba(102,187,106,0.3); }
-    .fac-bike { background: var(--fac-bike-bg); color: #7B1FA2; border: 1px solid rgba(171,71,188,0.3); }
+    .fac-sand { color: #B8860B; border: 1.5px solid rgba(232,168,82,0.45); }
+    .fac-play { color: #C2185B; border: 1.5px solid rgba(224,102,145,0.45); }
+    .fac-water { color: #1976D2; border: 1.5px solid rgba(66,165,245,0.45); }
+    .fac-lawn { color: #388E3C; border: 1.5px solid rgba(102,187,106,0.45); }
+    .fac-bike { color: #8E24AA; border: 1.5px solid rgba(171,71,188,0.45); }
     .place-footer {
       display: flex; align-items: center; justify-content: space-between;
       padding-top: 10px; border-top: 1.5px solid var(--border);
@@ -3338,12 +3338,12 @@ function renderNextBatch() {
     var fac = p.facilities.slice(0, 5);
     var free = hasFree(p);
     var costColor = p.cost === "免费" ? "var(--green-dark)" : "#E67E00";
-    var costBg = p.cost === "免费" ? "var(--fac-lawn-bg)" : "var(--fac-sand-bg)";
+    var costBorder = p.cost === "免费" ? "rgba(56,142,60,0.4)" : "rgba(230,126,0,0.4)";
     html += '<div class="place-card" onclick="openDetail('+p.id+')">'
       + '<div class="place-card-top">'
       + '<div class="place-name-row">'
       + '<div class="place-name">'+p.name+'</div>'
-      + '<div class="place-cost" style="color:'+costColor+';background:'+costBg+'">'+p.cost+'</div>'
+      + '<div class="place-cost" style="color:'+costColor+';border:1.5px solid '+costBorder+'">'+p.cost+'</div>'
       + '</div></div>'
       + '<div class="place-address-row">📍 '+p.address+(!locationFailed ? ' &nbsp;|&nbsp; 🚶 '+(p._distance !== null ? p._distance.toFixed(1) : '?')+' km' : '')+'</div>'
       + (p.note ? '<div class="place-note">💬 '+p.note+'</div>' : '')
@@ -3538,11 +3538,11 @@ function renderDetail(p) {
     if (VALID_FACILITIES.indexOf(p.facilities[i]) !== -1) {
       var tagStyle = '';
       var facName = p.facilities[i];
-      if (facName === '沙坑') tagStyle = 'background:var(--fac-sand-bg);color:#9A6500;border:1px solid rgba(232,168,82,0.3)';
-      else if (facName === '无动力') tagStyle = 'background:var(--fac-play-bg);color:#C2185B;border:1px solid rgba(224,102,145,0.3)';
-      else if (facName === '戏水区') tagStyle = 'background:var(--fac-water-bg);color:#1565C0;border:1px solid rgba(66,165,245,0.3)';
-      else if (facName === '大草坪') tagStyle = 'background:var(--fac-lawn-bg);color:#2E7D32;border:1px solid rgba(102,187,106,0.3)';
-      else if (facName === '骑行道') tagStyle = 'background:var(--fac-bike-bg);color:#7B1FA2;border:1px solid rgba(171,71,188,0.3)';
+      if (facName === '沙坑') tagStyle = 'color:#B8860B;border:1.5px solid rgba(232,168,82,0.45)';
+      else if (facName === '无动力') tagStyle = 'color:#C2185B;border:1.5px solid rgba(224,102,145,0.45)';
+      else if (facName === '戏水区') tagStyle = 'color:#1976D2;border:1.5px solid rgba(66,165,245,0.45)';
+      else if (facName === '大草坪') tagStyle = 'color:#388E3C;border:1.5px solid rgba(102,187,106,0.45)';
+      else if (facName === '骑行道') tagStyle = 'color:#8E24AA;border:1.5px solid rgba(171,71,188,0.45)';
       fhtml += '<div class="facility-tag" style="'+tagStyle+'">'+emoji(facName)+" "+displayName(facName)+"</div>";
     }
   }
