@@ -124,15 +124,12 @@
       80%{transform:rotate(420deg) scale(1.05)} 100%{transform:rotate(360deg) scale(1)} }
 
     /* 骰子弹窗 */
-    .dice-overlay { position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(26,46,36,0.25);z-index:900;
-      display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s ease;
-      backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px); }
-    .dice-overlay.show { opacity:1;pointer-events:auto; }
-    .dice-result { width:84%;max-width:340px;background:var(--mist-card);border-radius:var(--r-xl);
-      padding:26px 22px 22px;text-align:center;box-shadow:var(--sh-lg);
-      transform:translateY(24px) scale(0.96);transition:transform .4s cubic-bezier(.34,1.56,.64,1);
-      border:1px solid var(--bd); }
-    .dice-overlay.show .dice-result { transform:translateY(0) scale(1); }
+    .dice-overlay { position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(26,46,36,0.5);z-index:99999;
+      display:none;align-items:center;justify-content:center; }
+    .dice-overlay.show { display:flex; }
+    .dice-result { width:84%;max-width:340px;background:#FFFFFF;border-radius:24px;
+      padding:26px 22px 22px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.2);
+      border:1px solid rgba(91,138,110,0.13); }
     .dice-result-emoji { font-size:44px;margin-bottom:6px;display:block;animation:bounce-in .6s ease both; }
     .dice-result-title { font-size:20px;font-weight:700;color:var(--tx-primary);margin-bottom:3px;letter-spacing:-0.2px; }
     .dice-result-hint { font-size:12.5px;color:var(--tx-secondary);margin-bottom:14px;font-weight:400; }
@@ -419,6 +416,10 @@ var VALID_FACILITIES = ["沙坑","无动力","戏水区","大草坪","骑行道"
 var facilityDisplayNames = {"沙坑":"沙坑","无动力":"无动力","戏水区":"戏水","大草坪":"草坪"};
 function displayName(f) { return facilityDisplayNames[f] || f; }
 var facilityEmoji = {"沙坑":"🏖️","游乐设施":"🛝","戏水区":"💧","大草坪":"🌱","骑行道":"🚲","树荫":"🌳","景观绿地":"🌿","野趣树林":"🌲","白沙滩":"🏖️","儿童游乐区":"🛝","小型沙坑":"🏖️","健身设施":"🏋️","休闲绿地":"🌿","梯田":"🌾","稻田":"🌾","观景台":"🔭","水系":"💧","栈道":"🪵","滨水景观":"🏞️","露营地":"⛺","平缓木栈道":"🪵","溪流":"💧","溯溪":"🌊","环山木栈道":"🥾","山林绿植":"🌲"};
+
+/* 骰子文案（提前声明，确保随时可用） */
+var dicePhrases = ["今天就去这里吧！🌟","运气不错，试试这个！✨","这个选择很靠谱！💪","走起，别犹豫！🏃","今日份好运已送达 🍀","这个公园会给你惊喜的！🎁"];
+var diceEmojis = ["🎲","🎯","🌈","⭐","🍀","🎪","🎢","🏞️"];
 
 /* ==========================================
    数据 & 持久化
@@ -3664,16 +3665,6 @@ renderDetail = function(p) {
 /* ==========================================
    🎲 随机推荐（不知道去哪）
 ========================================= */
-var dicePhrases = [
-  "今天就去这里吧！🌟",
-  "运气不错，试试这个！✨",
-  "这个选择很靠谱！💪",
-  "走起，别犹豫！🏃",
-  "今日份好运已送达 🍀",
-  "这个公园会给你惊喜的！🎁",
-];
-var diceEmojis = ["🎲","🎯","🌈","⭐","🍀","🎪","🎢","🏞️"];
-
 function rollDice() {
   var btn = document.getElementById("dice-btn");
   btn.classList.add("rolling");
@@ -3728,8 +3719,8 @@ function showDiceResult(place) {
       + '<div class="dice-result-title">'+place.name+'</div>'
       + '<div class="dice-result-hint">'+phrase+'</div>'
       + '<div class="dice-result-tags">'+tagsHtml+'&nbsp;</div>'
-      + '<div class="dice-result-info" style="cursor:pointer" onclick="closeDice();openNavigation(PLACES.find(function(x){return x.id==='+place.id+';}))">'
-        + '<div>📍 '+place.address+' <span style="color:var(--fog-green);font-size:11px">导航 →</span></div>'
+      + '<div class="dice-result-info" style="cursor:pointer" onclick="closeDice();diceNavigate('+place.id+')">'
+        + '<div>📍 '+place.address+' <span style="color:#5B9A6E;font-size:11px">导航 →</span></div>'
         + distHtml
         + '<div>🎫 <span style="color:'+costColor+';font-weight:600">'+place.cost+'</span></div>'
         + (place.size ? '<div>📐 '+place.size+'</div>' : '')
@@ -3742,12 +3733,19 @@ function showDiceResult(place) {
       +'<div class="dice-close-hint">点击外部关闭</div>'
     +'</div>';
 
-  requestAnimationFrame(function(){ overlay.classList.add("show"); });
+  overlay.style.display = 'flex';
+  overlay.classList.add("show");
 }
 
 function closeDice() {
   var overlay = document.getElementById("dice-overlay");
-  if (overlay) overlay.classList.remove("show");
+  if (overlay) overlay.style.display = "none";
+  overlay.classList.remove("show");
+}
+
+function diceNavigate(id) {
+  var p = PLACES.find(function(x){ return x.id === id; });
+  if (p) openNavigation(p);
 }
 
 /* 导航：调起手机地图 App */
