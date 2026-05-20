@@ -3071,10 +3071,10 @@ loadPlaces();
    定位 & 距离计算
 ========================================= */
 var userLocation = null;
-var locationFailed = false; /* 定位是否失败（超时/拒绝/不支持）*/
-/* ====== 调试用默认位置（上线前删除此行 ====== */
+var locationFailed = false;
+/* 仅本地开发使用假定位 */
+var _isLocal = (location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1');
 var FALLBACK_LOC = { lat: 39.908723, lng: 116.3975 }; /* 天安门 */
-/* ====== 调试用默认位置（上线前删除此行 ====== */
 
 function calcDistance(lat1, lng1, lat2, lng2) {
   var R = 6371;
@@ -3111,7 +3111,7 @@ function locateUser() {
   var locEl = document.getElementById('location-status');
   if (!locEl) return;
   locEl.innerHTML = '<span style="color:#FFF">📍 定位中...</span>';
-  if (!navigator.geolocation) { locEl.innerHTML = '<span style="color:#FFE0E0">📍 不支持定位</span>'; /* ====== 调试用（上线前删除下面2行 ====== */ userLocation = FALLBACK_LOC; locationFailed = false; /* ====== 调试用（上线前删除上面2行 ====== */ return; }
+  if (!navigator.geolocation) { locEl.innerHTML = '<span style="color:#FFE0E0">📍 不支持定位</span>'; if (_isLocal) { userLocation = FALLBACK_LOC; locationFailed = false; } return; }
   navigator.geolocation.getCurrentPosition(
     function(pos) {
       userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
@@ -3126,11 +3126,9 @@ function locateUser() {
       if (err.code === 1) msg = '已拒绝定位';
       else if (err.code === 2) msg = '无法获取位置';
       else if (err.code === 3) msg = '定位超时';
-      /* ====== 调试用：定位失败时使用默认位置（上线前删除下面2行 ====== */
-      userLocation = FALLBACK_LOC;
-      locationFailed = false;
-      msg = '已定位（调试模式）';
-      /* ====== 调试用（上线前删除上面3行 ====== */
+      /* 仅本地开发时使用假定位 */
+      if (_isLocal) { userLocation = FALLBACK_LOC; locationFailed = false; msg = '已定位（本地调试）'; }
+      else { userLocation = null; }
       locEl.innerHTML = '<span style="color:#FFE0E0">📍 ' + msg + '</span>';
       renderHomeList(getFilteredPlaces());
       setTimeout(preloadMap, 1500); /* fallback 定位后也预热地图 */
