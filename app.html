@@ -3903,7 +3903,7 @@ function _initMap() {
 
   _mapInstance = L.map('leaflet-map', {
     center: [userLocation.lat, userLocation.lng],
-    zoom: 14,
+    zoom: 13,
     zoomControl: true
   });
 
@@ -3914,8 +3914,8 @@ function _initMap() {
   }).addTo(_mapInstance);
 
   var sorted = PLACES.slice().sort(function(a,b){ return (a._distance||999)-(b._distance||999); });
-  var nearPlaces = sorted.filter(function(p){ return p._distance !== null && p._distance <= 5; });
-  var topPlaces = nearPlaces.length > 0 ? nearPlaces : sorted.slice(0, 6);
+  var nearPlaces = sorted.filter(function(p){ return p._distance !== null && p._distance <= 15; });
+  var topPlaces = nearPlaces.length > 0 ? nearPlaces : sorted.slice(0, 8);
 
   L.circleMarker([userLocation.lat, userLocation.lng], {
     radius: 8, fillColor: '#2196F3', color: '#fff', weight: 2, fillOpacity: 0.9
