@@ -160,6 +160,9 @@
     .filter-tag { flex-shrink:0;padding:5px 13px;border-radius:18px;font-size:12.5px;font-weight:500;cursor:pointer;
       border:1px solid var(--bd);background:var(--mist-card);color:var(--tx-muted);transition:all .2s ease;user-select:none;letter-spacing:.2px; }
     .filter-tag.active { background:var(--fog-green);border-color:var(--fog-green);color:#FFF;box-shadow:var(--sh-sm); }
+    .cat-tag { flex-shrink:0;padding:5px 12px;border-radius:18px;font-size:12.5px;font-weight:500;cursor:pointer;
+      border:1px solid var(--bd);background:var(--mist-card);color:var(--tx-muted);transition:all .2s ease;user-select:none; }
+    .cat-tag.active { background:var(--fog-green);border-color:var(--fog-green);color:#FFF;box-shadow:var(--sh-sm); }
 
     /* ========== 卡片 · Apple Maps 风格 ========== */
     .places-list { padding:16px 16px 16px;display:flex;flex-direction:column;gap:10px; }
@@ -180,6 +183,14 @@
       -webkit-line-clamp:3;overflow:hidden;max-height:74px;}
     .place-facilities { display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px; }
     .place-size { font-size:11.5px;color:var(--tx-muted);line-height:1.4;margin-bottom:8px;padding-left:1px;font-weight:450; }
+    .place-cat-row { display:flex;align-items:center;gap:6px;margin-bottom:9px; }
+    .cat-chip { font-size:11px;font-weight:600;padding:2px 9px;border-radius:10px;
+      background:#E8F5E9;color:#2E7D32;white-space:nowrap;letter-spacing:.3px; }
+    .cat-chip.cat-play { background:#FFF3E0;color:#E65100; }
+    .cat-chip.cat-nature { background:#E3F2FD;color:#1565C0; }
+    .cat-chip.cat-street { background:#F3E5F5;color:#7B1FA2; }
+    .scene-badge { font-size:10px;font-weight:600;padding:1px 7px;border-radius:8px;
+      background:#FFEBEE;color:#C62828;margin-left:auto; }
 
     /* 设施标签（统一低饱和雾绿调，不再彩虹色） */
     .facility-mini { font-size:11px;padding:3px 9px;border-radius:14px;font-weight:500;
@@ -424,6 +435,15 @@
         <span style="font-size:15px;color:var(--tx-muted)">🔍</span>
         <input type="text" placeholder="搜索公园、设施..." id="search-input" />
         <div class="dice-btn" id="dice-btn" onclick="rollDice()">🎲</div>
+      </div>
+
+      <!-- 分类筛选栏 -->
+      <div class="filter-bar" id="category-bar" style="padding:8px 16px 10px">
+        <div class="cat-tag active" data-category="all">全部</div>
+        <div class="cat-tag" data-category="户外公园">🌿 户外</div>
+        <div class="cat-tag" data-category="游乐场">🎠 游乐</div>
+        <div class="cat-tag" data-category="自然探索">⛰️ 探索</div>
+        <div class="cat-tag" data-category="街心公园">🌳 街心</div>
       </div>
 
       <!-- 设施筛选栏 -->
@@ -3130,6 +3150,7 @@ function hasFree(p)   { return false; }
 
 /* 状态 */
 var currentFilter = "all";
+var currentCategory = "all";
 var currentParkingType = null;
 
 /* ==========================================
@@ -3197,6 +3218,17 @@ function renderNextBatch() {
       var sizeEmoji = sizeLabel.indexOf('超大')!==-1?'🏕️':sizeLabel.indexOf('大型')!==-1?'🌲':sizeLabel.indexOf('中型')!==-1?'🌳':'🌿';
       html += '<div class="place-size">'+sizeEmoji+' '+sizeText+'</div>';
     }
+    /* 分类标签 + 室内外角标 */
+    var cat = p.category || '户外公园';
+    var catCls = 'cat-chip';
+    if (cat === '游乐场') catCls += ' cat-play';
+    else if (cat === '自然探索') catCls += ' cat-nature';
+    else if (cat === '街心公园') catCls += ' cat-street';
+    html += '<div class="place-cat-row">';
+    html += '<span class="'+catCls+'">'+cat+'</span>';
+    if (p.scene === '室内') html += '<span class="scene-badge">室内</span>';
+    else html += '<span class="scene-badge" style="background:#E8F5E9;color:#2E7D32">室外</span>';
+    html += '</div>';
     html += '<div class="place-footer">';
     html += '<div class="parking-hint'+(free?' free':'')+'">🚗 '+p.parking.length+' 个停车方案'+(free?'（含免费）':'')+'</div>';
     html += '<div class="facility-count">🎯 '+p.facilities.length+' 项设施</div>';
@@ -3278,6 +3310,9 @@ function showLoadSentinel() {
 function getFilteredPlaces() {
   var q = document.getElementById("search-input").value.trim().toLowerCase();
   var list = calcAllDistances(PLACES.slice(0));
+  if (currentCategory !== "all") {
+    list = list.filter(function(p){ return p.category === currentCategory; });
+  }
   if (currentFilter !== "all") {
     list = list.filter(function(p){ return p.facilities.indexOf(currentFilter) !== -1; });
   }
@@ -3299,6 +3334,15 @@ document.getElementById("filter-bar").addEventListener("click", function(e) {
   for (var i = 0; i < tags.length; i++) tags[i].classList.remove("active");
   tag.classList.add("active");
   currentFilter = tag.getAttribute("data-filter");
+  renderHomeList(getFilteredPlaces());
+});
+document.getElementById("category-bar").addEventListener("click", function(e) {
+  var tag = e.target.closest(".cat-tag");
+  if (!tag) return;
+  var tags = document.querySelectorAll(".cat-tag");
+  for (var i = 0; i < tags.length; i++) tags[i].classList.remove("active");
+  tag.classList.add("active");
+  currentCategory = tag.getAttribute("data-category");
   renderHomeList(getFilteredPlaces());
 });
 document.getElementById("search-input").addEventListener("input", function() {
