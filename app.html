@@ -3582,16 +3582,18 @@ var pwdInput = document.getElementById("pwd-input");
 var pwdError = document.getElementById("pwd-error");
 
 function showPwdModal() {
+  if (!pwdModal || !pwdInput) return; /* 密码面板已移除，直接跳过 */
   if (isUnlocked) { openForm(null); return; } /* 已解锁直接进表单 */
-  pwdError.textContent = "";
+  if (pwdError) pwdError.textContent = "";
   pwdInput.value = "";
   pwdModal.classList.add("show");
-  setTimeout(function(){ pwdInput.focus(); }, 100);
+  setTimeout(function(){ if(pwdInput) pwdInput.focus(); }, 100);
 }
 function hidePwdModal() {
-  pwdModal.classList.remove("show");
+  if (pwdModal) pwdModal.classList.remove("show");
 }
 function checkPassword() {
+  if (!pwdInput || !pwdError) return;
   var v = pwdInput.value.trim();
   if (!v) { pwdError.textContent = "请输入密码"; return; }
   /* 纯前端密码验证（仅用于编辑门控） */
@@ -3602,12 +3604,14 @@ function checkPassword() {
   } else {
     pwdError.textContent = "密码错误，请重试";
     pwdInput.value = "";
-    setTimeout(function(){ pwdInput.focus(); }, 100);
+    setTimeout(function(){ if(pwdInput) pwdInput.focus(); }, 100);
   }
 }
-pwdInput.addEventListener("keydown", function(e) {
-  if (e.keyCode === 13) { e.preventDefault(); checkPassword(); }
-});
+if (pwdInput) {
+  pwdInput.addEventListener("keydown", function(e) {
+    if (e.keyCode === 13) { e.preventDefault(); checkPassword(); }
+  });
+}
 
 /* ==========================================
    编辑表单
@@ -4014,9 +4018,11 @@ function _initMap() {
   };
   function catColor(cat) { return CAT_COLORS[cat] || '#9BC5A0'; }
 
-  L.circleMarker([userLocation.lat, userLocation.lng], {
+  var _mapMarkers = [];
+
+  _mapMarkers.push(L.circleMarker([userLocation.lat, userLocation.lng], {
     radius: 8, fillColor: '#2196F3', color: '#fff', weight: 2, fillOpacity: 0.9
-  }).addTo(_mapInstance).bindPopup('<b>📍 你的位置</b>');
+  }).addTo(_mapInstance).bindPopup('<b>📍 你的位置</b>'));
 
   for (var i = 0; i < topPlaces.length; i++) {
     var p = topPlaces[i];
@@ -4031,13 +4037,12 @@ function _initMap() {
     if (facs.length > 0) pop += '<br/><br/>🏸 '+facs.join('、');
     if (p.note) pop += '<br/><br/><span style="color:#666;font-size:12px;">'+p.note.substring(0,80)+(p.note.length>80?'...':'')+'</span>';
     pop += '</div>';
-    L.circleMarker([p.lat, p.lng], {
+    _mapMarkers.push(L.circleMarker([p.lat, p.lng], {
       radius: 8, fillColor: catColor(catLabel), color: '#fff', weight: 1.75, fillOpacity: 0.88
-    }).addTo(_mapInstance).bindPopup(pop);
+    }).addTo(_mapInstance).bindPopup(pop));
   }
 
-  var group = L.featureGroup(_mapInstance.getLayers());
-  try { _mapInstance.fitBounds(group.getBounds().pad(0.25)); } catch(e){}
+  if (_mapMarkers.length > 0) { try { _mapInstance.fitBounds(L.featureGroup(_mapMarkers).getBounds().pad(0.25)); } catch(e){} }
 
   var html = '';
   for (var j = 0; j < topPlaces.length; j++) {
