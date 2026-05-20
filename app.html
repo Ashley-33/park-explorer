@@ -3075,6 +3075,8 @@ var locationFailed = false;
 /* 仅本地开发使用假定位 */
 var _isLocal = (location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1');
 var FALLBACK_LOC = { lat: 39.908723, lng: 116.3975 }; /* 天安门 */
+var _locAttempts = 0;
+var _bestPos = null; /* 多次采样中精度最好的 */
 
 function calcDistance(lat1, lng1, lat2, lng2) {
   var R = 6371;
@@ -3112,29 +3114,62 @@ function locateUser() {
   if (!locEl) return;
   locEl.innerHTML = '<span style="color:#FFF">📍 定位中...</span>';
   if (!navigator.geolocation) { locEl.innerHTML = '<span style="color:#FFE0E0">📍 不支持定位</span>'; if (_isLocal) { userLocation = FALLBACK_LOC; locationFailed = false; } return; }
-  navigator.geolocation.getCurrentPosition(
-    function(pos) {
-      userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      locationFailed = false;
-      locEl.innerHTML = '<span style="color:#FFFFFF">📍 已定位</span>';
-      renderHomeList(getFilteredPlaces());
-      setTimeout(preloadMap, 1500); /* 定位成功后 1.5s 预热地图 */
-    },
-    function(err) {
-      var msg = '定位失败';
-      locationFailed = true;
-      if (err.code === 1) msg = '已拒绝定位';
-      else if (err.code === 2) msg = '无法获取位置';
-      else if (err.code === 3) msg = '定位超时';
-      /* 仅本地开发时使用假定位 */
-      if (_isLocal) { userLocation = FALLBACK_LOC; locationFailed = false; msg = '已定位（本地调试）'; }
-      else { userLocation = null; }
-      locEl.innerHTML = '<span style="color:#FFE0E0">📍 ' + msg + '</span>';
-      renderHomeList(getFilteredPlaces());
-      setTimeout(preloadMap, 1500); /* fallback 定位后也预热地图 */
-    },
-    { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
-  );
+
+  _locAttempts = 0;
+  _bestPos = null;
+
+  /* 连续采样最多3次，取精度最高的 */
+  var maxSamples = 3;
+
+  function tryLocate() {
+    _locAttempts++;
+    navigator.geolocation.getCurrentPosition(
+      function(pos) {
+        var acc = pos.coords.accuracy || 9999; /* 精度，单位米 */
+        /* 记录最佳位置 */
+        if (!_bestPos || acc < (_bestPos.accuracy || 9999)) {
+          _bestPos = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: acc };
+        }
+        /* 如果精度已经很好（<50m）或已采够次数，直接用 */
+        if (acc < 50 || _locAttempts >= maxSamples) {
+          _useBestPosition(locEl);
+          return;
+        }
+        /* 精度不够好，再试一次（间隔800ms避免过于频繁） */
+        locEl.innerHTML = '<span style="color:#FFF">📍 精准定位中(' + _locAttempts + '/' + maxSamples + ')...</span>';
+        setTimeout(tryLocate, 800);
+      },
+      function(err) {
+        /* 只要拿到过一次结果就用，否则算失败 */
+        if (_bestPos) { _useBestPosition(locEl); return; }
+        var msg = '定位失败';
+        locationFailed = true;
+        if (err.code === 1) msg = '已拒绝定位';
+        else if (err.code === 2) msg = '无法获取位置';
+        else if (err.code === 3) msg = '定位超时';
+        /* 仅本地开发时使用假定位 */
+        if (_isLocal) { userLocation = FALLBACK_LOC; locationFailed = false; msg = '已定位（本地调试）'; }
+        else { userLocation = null; }
+        locEl.innerHTML = '<span style="color:#FFE0E0">📍 ' + msg + '</span>';
+        renderHomeList(getFilteredPlaces());
+        setTimeout(preloadMap, 1500);
+      },
+      /* 关键参数：不用缓存(maxAge=0)、高精度、12秒超时 */
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+    );
+  }
+
+  function _useBestPosition(locEl) {
+    if (!_bestPos) return;
+    userLocation = { lat: _bestPos.lat, lng: _bestPos.lng };
+    locationFailed = false;
+    var accText = _bestPos.accuracy < 50 ? '✅' : (_bestPos.accuracy < 200 ? '⚠️' : '📍');
+    locEl.innerHTML = '<span style="color:#FFFFFF">' + accText + ' 已定位(±' + Math.round(_bestPos.accuracy) + 'm)</span>';
+    renderHomeList(getFilteredPlaces());
+    setTimeout(preloadMap, 1500);
+  }
+
+  tryLocate();
 }
 setTimeout(function() { locateUser(); }, 2000);
 
