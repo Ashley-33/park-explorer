@@ -182,15 +182,16 @@
       box-sizing:border-box;display:-webkit-box;-webkit-box-orient:vertical;
       -webkit-line-clamp:3;overflow:hidden;max-height:74px;}
     .place-facilities { display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px; }
-    .place-size { font-size:11.5px;color:var(--tx-muted);line-height:1.4;margin-bottom:8px;padding-left:1px;font-weight:450; }
-    .place-cat-row { display:flex;align-items:center;gap:6px;margin-bottom:9px; }
-    .cat-chip { font-size:11px;font-weight:600;padding:2px 9px;border-radius:10px;
+    .place-size { display:none; }
+    .place-meta-row { display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px;padding-left:1px; }
+    .meta-size { font-size:11px;color:var(--tx-muted);font-weight:450; }
+    .cat-chip { font-size:10.5px;font-weight:600;padding:1.5px 8px;border-radius:9px;
       background:#E8F5E9;color:#2E7D32;white-space:nowrap;letter-spacing:.3px; }
     .cat-chip.cat-play { background:#FFF3E0;color:#E65100; }
     .cat-chip.cat-nature { background:#E3F2FD;color:#1565C0; }
     .cat-chip.cat-street { background:#F3E5F5;color:#7B1FA2; }
-    .scene-badge { font-size:10px;font-weight:600;padding:1px 7px;border-radius:8px;
-      background:#FFEBEE;color:#C62828;margin-left:auto; }
+    .scene-badge { font-size:10px;font-weight:500;padding:1.5px 7px;border-radius:9px;
+      background:#E8F5E9;color:#2E7D32;opacity:.75; }
 
     /* 设施标签（统一低饱和雾绿调，不再彩虹色） */
     .facility-mini { font-size:11px;padding:3px 9px;border-radius:14px;font-weight:500;
@@ -3235,22 +3236,21 @@ function renderNextBatch() {
       html += '<span class="facility-mini" style="color:var(--tx-muted)">+'+(validCount-5)+'</span>';
     }
     html += '</div>';
-    if (p.size) {
-      var sizeText = p.size;
-      var sizeLabel = sizeText.split('·')[0];
-      var sizeEmoji = sizeLabel.indexOf('超大')!==-1?'🏕️':sizeLabel.indexOf('大型')!==-1?'🌲':sizeLabel.indexOf('中型')!==-1?'🌳':'🌿';
-      html += '<div class="place-size">'+sizeEmoji+' '+sizeText+'</div>';
-    }
-    /* 分类标签 + 室内外角标 */
+    /* 尺寸 + 分类 + 室内外 合并一行 */
     var cat = p.category || '户外公园';
     var catCls = 'cat-chip';
     if (cat === '游乐场') catCls += ' cat-play';
     else if (cat === '自然探索') catCls += ' cat-nature';
     else if (cat === '街心公园') catCls += ' cat-street';
-    html += '<div class="place-cat-row">';
+
+    html += '<div class="place-meta-row">';
+    if (p.size) {
+      var sizeText = p.size;
+      html += '<span class="meta-size">'+sizeText+'</span>';
+    }
     html += '<span class="'+catCls+'">'+cat+'</span>';
-    if (p.scene === '室内') html += '<span class="scene-badge">室内</span>';
-    else html += '<span class="scene-badge" style="background:#E8F5E9;color:#2E7D32">室外</span>';
+    if (p.scene === '室内') html += '<span class="scene-badge" style="background:#FFEBEE;color:#C62828;opacity:1">室内</span>';
+    else html += '<span class="scene-badge">室外</span>';
     html += '</div>';
     html += '<div class="place-footer">';
     html += '<div class="parking-hint'+(free?' free':'')+'">🚗 '+p.parking.length+' 个停车方案'+(free?'（含免费）':'')+'</div>';
