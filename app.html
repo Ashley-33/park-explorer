@@ -3349,25 +3349,7 @@ function getFilteredPlaces() {
   return list;
 }
 
-/* 筛选栏事件 */
-document.getElementById("filter-bar").addEventListener("click", function(e) {
-  var tag = e.target.closest(".filter-tag");
-  if (!tag) return;
-  var tags = document.querySelectorAll(".filter-tag");
-  for (var i = 0; i < tags.length; i++) tags[i].classList.remove("active");
-  tag.classList.add("active");
-  currentFilter = tag.getAttribute("data-filter");
-  renderHomeList(getFilteredPlaces());
-});
-document.getElementById("category-bar").addEventListener("click", function(e) {
-  var tag = e.target.closest(".cat-tag");
-  if (!tag) return;
-  var tags = document.querySelectorAll(".cat-tag");
-  for (var i = 0; i < tags.length; i++) tags[i].classList.remove("active");
-  tag.classList.add("active");
-  currentCategory = tag.getAttribute("data-category");
-  renderHomeList(getFilteredPlaces());
-});
+/* 搜索事件 */
 document.getElementById("search-input").addEventListener("input", function() {
   renderHomeList(getFilteredPlaces());
 });
