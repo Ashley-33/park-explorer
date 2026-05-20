@@ -4020,9 +4020,15 @@ function _initMap() {
 
   var _mapMarkers = [];
 
-  _mapMarkers.push(L.circleMarker([userLocation.lat, userLocation.lng], {
-    radius: 8, fillColor: '#2196F3', color: '#fff', weight: 2, fillOpacity: 0.9
-  }).addTo(_mapInstance).bindPopup('<b>📍 你的位置</b>'));
+  /* 妥妥头像作为用户定位图标 */
+  var _tuotuoIcon = L.divIcon({
+    className: 'tuotuo-marker',
+    html: '<img src="tuotuo.jpg" style="width:32px;height:32px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.25);object-fit:cover;display:block;" />',
+    iconSize: [32, 36],
+    iconAnchor: [16, 36],
+    popupAnchor: [0, -18]
+  });
+  _mapMarkers.push(L.marker([userLocation.lat, userLocation.lng], {icon: _tuotuoIcon, zIndexOffset: 999}).addTo(_mapInstance).bindPopup('<b>📍 妥妥在这里</b>'));
 
   for (var i = 0; i < topPlaces.length; i++) {
     var p = topPlaces[i];
