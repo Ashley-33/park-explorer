@@ -3903,7 +3903,7 @@ function _initMap() {
 
   _mapInstance = L.map('leaflet-map', {
     center: [userLocation.lat, userLocation.lng],
-    zoom: 12,
+    zoom: 14,
     zoomControl: true
   });
 
@@ -3914,7 +3914,8 @@ function _initMap() {
   }).addTo(_mapInstance);
 
   var sorted = PLACES.slice().sort(function(a,b){ return (a._distance||999)-(b._distance||999); });
-  var topPlaces = sorted.slice(0, 12);
+  var nearPlaces = sorted.filter(function(p){ return p._distance !== null && p._distance <= 5; });
+  var topPlaces = nearPlaces.length > 0 ? nearPlaces : sorted.slice(0, 6);
 
   L.circleMarker([userLocation.lat, userLocation.lng], {
     radius: 8, fillColor: '#2196F3', color: '#fff', weight: 2, fillOpacity: 0.9
@@ -3938,7 +3939,7 @@ function _initMap() {
   }
 
   var group = L.featureGroup(_mapInstance.getLayers());
-  try { _mapInstance.fitBounds(group.getBounds().pad(0.15)); } catch(e){}
+  try { _mapInstance.fitBounds(group.getBounds().pad(0.25)); } catch(e){}
 
   var html = '';
   for (var j = 0; j < topPlaces.length; j++) {
