@@ -21,8 +21,8 @@
   <meta http-equiv="Expires" content="0" />
   <title>遛呗 · 北京</title>
   <!-- Leaflet CSS & JS（免费开源地图，无需 API key）-->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <style>
     :root {
       /* === 雾绿色系 · 低饱和 · 自然感 === */
@@ -200,10 +200,10 @@
     .retry-hint { font-size:12px;color:var(--tx-faint);margin-top:8px; }
 
     /* 地图按钮 */
-    .map-btn { font-size:18px;cursor:pointer;padding:4px 8px;border-radius:var(--r-xs);
-      background:var(--mist);transition:all .15s ease;-webkit-tap-highlight-color:transparent;
+    .map-btn { font-size:22px;cursor:pointer;padding:6px 10px;border-radius:var(--r-sm);
+      background:transparent;transition:all .15s ease;-webkit-tap-highlight-color:transparent;
       user-select:none;line-height:1.5;border:none; }
-    .map-btn:active { transform:scale(0.92);background:#e8f5e9; }
+    .map-btn:active { transform:scale(0.92);opacity:.75; }
 
     /* 地图浮层 */
     .map-overlay { display:none;position:fixed;top:0;left:0;right:0;bottom:0;
@@ -222,6 +222,12 @@
 
     .map-body { flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative; }
     #leaflet-map { position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;z-index:1; }
+
+    /* 地图加载中 */
+    .map-loading { position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;text-align:center;transition:opacity .25s ease; }
+    .map-spinner { width:36px;height:36px;border:3.5px solid #E8F5E9;border-top-color:#07C160;border-radius:50%;animation:mapSpin .7s linear infinite;margin:0 auto 10px; }
+    @keyframes mapSpin { to{ transform:rotate(360deg);} }
+    .map-loading-text { font-size:13px;color:var(--tx-secondary);font-weight:500; }
 
     /* 公园点位列表 — 覆盖在地图上的底部面板 */
     .map-place-list { position:absolute;bottom:0;left:0;right:0;max-height:40vh;
@@ -411,7 +417,7 @@
           </div>
         </div>
         <div class="city-chip" id="location-status" onclick="locateUser()" style="cursor:pointer" title="点击重新定位">📍 定位中...</div>
-        <div class="map-btn" id="map-btn" onclick="openMapLayer()" title="查看地图">🗺️</div>
+        <div class="map-btn" id="map-btn" onclick="openMapLayer()" title="查看地图"><svg viewBox="0 0 36 36" width="28" height="28" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="36" height="36" rx="7" fill="#FFF3E0"/><path d="M4 2 L32 6 L30 30 L2 26Z" fill="#fff" stroke="#E0E0E0" stroke-width="1.2"/><path d="M12 3 L11 29" stroke="#EEE" stroke-width="1.3"/><path d="M22 4 L21 29.5" stroke="#EEE" stroke-width="1.3"/><ellipse cx="9" cy="11" rx="5" ry="3.5" fill="#C8E6C9" opacity=".65"/><ellipse cx="27" cy="24" rx="6" ry="4" fill="#A5D6A7" opacity=".55"/><path d="M6 17 Q13 13 18 16 T28 14" fill="none" stroke="#81D4FA" stroke-width="3" stroke-linecap="round" opacity=".55"/><g transform="translate(18,14)"><circle cx="0" cy="-1" r="9" fill="#FF5722" opacity=".15"/><path d="M0 -13 C-8 -13 -14 -7 -14 -1 C-14 7 0 20 0 20 C0 20 14 7 14 -1 C14 -7 8 -13 0 -13Z" fill="#FF5722"/><path d="M0 -10 C-6 -10 -11 -5 -11 -1 C-11 6 0 16 0 16 C0 16 11 6 11 -1 C11 -5 6 -10 0 -10Z" fill="#FF7043"/><circle cx="0" cy="0" r="3.5" fill="#fff"/></g></svg></div>
       </div>
       <div class="search-bar">
         <span style="font-size:15px;color:var(--tx-muted)">🔍</span>
@@ -3091,6 +3097,7 @@ function locateUser() {
       locationFailed = false;
       locEl.innerHTML = '<span style="color:#FFFFFF">📍 已定位</span>';
       renderHomeList(getFilteredPlaces());
+      setTimeout(preloadMap, 1500); /* 定位成功后 1.5s 预热地图 */
     },
     function(err) {
       var msg = '定位失败';
@@ -3105,6 +3112,7 @@ function locateUser() {
       /* ====== 调试用（上线前删除上面3行 ====== */
       locEl.innerHTML = '<span style="color:#FFE0E0">📍 ' + msg + '</span>';
       renderHomeList(getFilteredPlaces());
+      setTimeout(preloadMap, 1500); /* fallback 定位后也预热地图 */
     },
     { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
   );
@@ -3878,30 +3886,20 @@ function openWithFallback(schemeUrl, fallbackUrl) {
 
 /* ========== 地图浮层（Leaflet 交互式地图）========== */
 var _mapInstance = null;
+var _mapReady = false;      /* 地图是否已初始化完毕 */
+var _mapPendingOpen = false; /* 地图就绪前用户点了按钮 */
 
-function openMapLayer() {
-  document.getElementById('map-overlay').classList.add('active');
-  document.body.style.overflow = 'hidden';
-  setTimeout(function(){ renderMapContent(); }, 120);
+/* 页面加载后延迟预热地图，不阻塞主界面 */
+function preloadMap() {
+  if (typeof L === 'undefined' || !userLocation) return;
+  if (_mapReady) return;
+  _mapReady = true;
+  _initMap();
 }
 
-function closeMapLayer() {
-  document.getElementById('map-overlay').classList.remove('active');
-  document.body.style.overflow = '';
-  if (_mapInstance) { _mapInstance.remove(); _mapInstance = null; }
-}
-
-function renderMapContent() {
-  var mapContainer = document.getElementById('leaflet-map');
-  var listEl = document.getElementById('map-place-list');
-
-  if (!userLocation) {
-    mapContainer.innerHTML = '<div style="padding:60px 20px;color:var(--tx-secondary);text-align:center;font-size:14px;">📍 请先完成定位</div>';
-    listEl.innerHTML = '';
-    return;
-  }
-
-  if (_mapInstance) { _mapInstance.remove(); _mapInstance = null; }
+function _initMap() {
+  var mapEl = document.getElementById('leaflet-map');
+  if (!mapEl || _mapInstance) return;
 
   _mapInstance = L.map('leaflet-map', {
     center: [userLocation.lat, userLocation.lng],
@@ -3909,20 +3907,17 @@ function renderMapContent() {
     zoomControl: true
   });
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://openstreetmap.org">OSM</a>',
-    maxZoom: 18
+  L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=6&x={x}&y={y}&z={z}', {
+    attribution: '&copy; 高德地图',
+    maxZoom: 18,
+    subdomains: ['1','2','3','4']
   }).addTo(_mapInstance);
 
   var sorted = PLACES.slice().sort(function(a,b){ return (a._distance||999)-(b._distance||999); });
-  var topPlaces = sorted.slice(0, 20);
+  var topPlaces = sorted.slice(0, 12);
 
   L.circleMarker([userLocation.lat, userLocation.lng], {
-    radius: 8,
-    fillColor: '#2196F3',
-    color: '#fff',
-    weight: 2,
-    fillOpacity: 0.9
+    radius: 8, fillColor: '#2196F3', color: '#fff', weight: 2, fillOpacity: 0.9
   }).addTo(_mapInstance).bindPopup('<b>📍 你的位置</b>');
 
   for (var i = 0; i < topPlaces.length; i++) {
@@ -3938,16 +3933,12 @@ function renderMapContent() {
     pop += '</div>';
     var mc = i<3 ? '#07C160' : (i<8 ? '#60A55F' : '#9BC5A0');
     L.circleMarker([p.lat, p.lng], {
-      radius: 7,
-      fillColor: mc,
-      color: '#fff',
-      weight: 1.5,
-      fillOpacity: 0.85
+      radius: 7, fillColor: mc, color: '#fff', weight: 1.5, fillOpacity: 0.85
     }).addTo(_mapInstance).bindPopup(pop);
   }
 
   var group = L.featureGroup(_mapInstance.getLayers());
-  _mapInstance.fitBounds(group.getBounds().pad(0.15));
+  try { _mapInstance.fitBounds(group.getBounds().pad(0.15)); } catch(e){}
 
   var html = '';
   for (var j = 0; j < topPlaces.length; j++) {
@@ -3965,8 +3956,39 @@ function renderMapContent() {
       + '<div class="map-place-detail">'+detailNote+detailFac+'</div>'
       + '</div></div>';
   }
-  listEl.innerHTML = html;
+  document.getElementById('map-place-list').innerHTML = html;
+
+  /* 地图容器大小可能在隐藏时算错，打开时修正 */
+  if (_mapPendingOpen) {
+    _mapPendingOpen = false;
+    setTimeout(function(){ _mapInstance.invalidateSize(); }, 100);
+  }
 }
+
+function openMapLayer() {
+  document.getElementById('map-overlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  if (!userLocation) return;
+
+  if (!_mapReady) {
+    /* 地图还没预热，立即初始化 */
+    _mapReady = true;
+    _mapPendingOpen = true;
+    _initMap();
+  } else if (_mapInstance) {
+    /* 已有实例，修正尺寸即可（因之前是隐藏状态） */
+    setTimeout(function(){ _mapInstance.invalidateSize(); }, 80);
+  }
+}
+
+function closeMapLayer() {
+  document.getElementById('map-overlay').classList.remove('active');
+  document.body.style.overflow = '';
+  /* 不销毁实例，只是隐藏浮层 */
+}
+
+function renderMapContent() { /* 保留空函数，防止旧代码调用报错 */ }
 
 function flyToPark(lat, lng) {
   if (!_mapInstance) return;
