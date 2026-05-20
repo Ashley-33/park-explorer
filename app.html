@@ -247,6 +247,16 @@
       border-top:1px solid var(--bd);border-radius:16px 16px 0 0;
       padding:10px 12px 20px;z-index:5;box-shadow:0 -4px 20px rgba(0,0,0,.08);
       -webkit-overflow-scrolling:touch; }
+
+    /* 分类图例 */
+    .map-legend { position:absolute;top:12px;right:12px;z-index:600;
+      background:rgba(255,255,255,.94);backdrop-filter:blur(12px);
+      border-radius:14px;padding:10px 13px;box-shadow:0 2px 16px rgba(0,0,0,.1);
+      border:1px solid rgba(0,0,0,.06);min-width:110px; }
+    .map-legend-title { font-size:11.5px;font-weight:700;color:#333;margin-bottom:7px;letter-spacing:.5px; }
+    .map-legend-item { display:flex;align-items:center;gap:8px;font-size:12px;color:#555;line-height:1.9;font-weight:500;cursor:pointer;transition:opacity .2s; }
+    .map-legend-item:hover { opacity:.65; }
+    .map-legend-dot { width:12px;height:12px;border-radius:50%;flex-shrink:0;border:1.5px solid #fff;box-shadow:0 0 0 .5px rgba(0,0,0,.15); }
     .map-place-item { display:flex;gap:12px;padding:13px 14px;margin-bottom:8px;
       background:#fff;border-radius:var(--r-sm);border:1px solid var(--bd);
       transition:transform .15s ease,box-shadow .15s ease;-webkit-tap-highlight-color:transparent;
@@ -3995,6 +4005,15 @@ function _initMap() {
   var nearPlaces = sorted.filter(function(p){ return p._distance !== null && p._distance <= 15; });
   var topPlaces = nearPlaces.length > 0 ? nearPlaces : sorted.slice(0, 8);
 
+  /* 分类颜色 */
+  var CAT_COLORS = {
+    '户外公园': '#07C160',
+    '游乐场': '#FF7043',
+    '自然探索': '#42A5F5',
+    '街心公园': '#AB47BC'
+  };
+  function catColor(cat) { return CAT_COLORS[cat] || '#9BC5A0'; }
+
   L.circleMarker([userLocation.lat, userLocation.lng], {
     radius: 8, fillColor: '#2196F3', color: '#fff', weight: 2, fillOpacity: 0.9
   }).addTo(_mapInstance).bindPopup('<b>📍 你的位置</b>');
@@ -4003,16 +4022,17 @@ function _initMap() {
     var p = topPlaces[i];
     var d = p._distance !== null ? p._distance.toFixed(1) : '?';
     var facs = (p.facilities||[]).filter(function(f){return VALID_FACILITIES.indexOf(f)!==-1;}).slice(0,5);
+    var catLabel = p.category || '户外公园';
     var pop = '<div style="min-width:180px;font-size:13px;line-height:1.5;">'
       + '<b style="font-size:14px;">'+p.name+'</b>'
-      + '<br/><span style="color:#07C160;font-weight:600;">🚶 '+d+' km &nbsp;'+p.cost+'</span>'
+      + '<br/><span style="color:'+catColor(catLabel)+';font-weight:600;">🚶 '+d+' km &nbsp;'+p.cost+'</span>'
+      + '<br/>🏷️ '+catLabel
       + '<br/>📍 '+p.address;
     if (facs.length > 0) pop += '<br/><br/>🏸 '+facs.join('、');
     if (p.note) pop += '<br/><br/><span style="color:#666;font-size:12px;">'+p.note.substring(0,80)+(p.note.length>80?'...':'')+'</span>';
     pop += '</div>';
-    var mc = i<3 ? '#07C160' : (i<8 ? '#60A55F' : '#9BC5A0');
     L.circleMarker([p.lat, p.lng], {
-      radius: 7, fillColor: mc, color: '#fff', weight: 1.5, fillOpacity: 0.85
+      radius: 8, fillColor: catColor(catLabel), color: '#fff', weight: 1.75, fillOpacity: 0.88
     }).addTo(_mapInstance).bindPopup(pop);
   }
 
@@ -4023,19 +4043,37 @@ function _initMap() {
   for (var j = 0; j < topPlaces.length; j++) {
     var pj = topPlaces[j], dj = pj._distance!==null ? pj._distance.toFixed(1) : '?';
     var rankBg = j<3 ? 'var(--fog-green)' : (j<6 ? '#60A55F' : '#9BC5A0');
+    var catColorVal = catColor(pj.category || '户外公园');
     var fjcs = (pj.facilities||[]).filter(function(f){return VALID_FACILITIES.indexOf(f)!==-1;}).slice(0,4);
     var detailNote = pj.note ? ('<b>简介：</b>'+pj.note+'<br/><br/>') : '';
     var detailFac = fjcs.length > 0 ? ('<b>设施：</b>'+(pj.facilities||[]).filter(function(f){return VALID_FACILITIES.indexOf(f)!==-1;}).join('、')) : '';
     html += '<div class="map-place-item" onclick="toggleMapPlace(this);flyToPark('+pj.lat+','+pj.lng+')">'
       + '<div class="map-place-rank" style="background:'+rankBg+'">'+(j+1)+'</div>'
       + '<div class="map-place-info">'
-      + '<div class="map-place-name">'+pj.name+'</div>'
+      + '<div class="map-place-name"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+catColorVal+';margin-right:6px;vertical-align:middle;"></span>'+pj.name+'</div>'
       + '<div class="map-place-dist">🚶 '+dj+' km &nbsp;&nbsp;'+pj.cost+'</div>'
       + '<div class="map-place-address">'+pj.address+'</div>'
       + '<div class="map-place-detail">'+detailNote+detailFac+'</div>'
       + '</div></div>';
   }
   document.getElementById('map-place-list').innerHTML = html;
+
+  /* 分类图例 */
+  var legendHtml = '<div class="map-legend"><div class="map-legend-title">🏷️ 公园分类</div>';
+  var catOrder = ['户外公园','游乐场','自然探索','街心公园'];
+  for (var ci = 0; ci < catOrder.length; ci++) {
+    legendHtml += '<div class="map-legend-item"><span class="map-legend-dot" style="background:'+CAT_COLORS[catOrder[ci]]+'"></span>'+catOrder[ci]+'</div>';
+  }
+  legendHtml += '</div>';
+  var mapBody = document.getElementById('map-body');
+  if (!document.getElementById('map-legend-panel')) {
+    var legEl = document.createElement('div');
+    legEl.id = 'map-legend-panel';
+    legEl.innerHTML = legendHtml;
+    mapBody.appendChild(legEl);
+  } else {
+    document.getElementById('map-legend-panel').innerHTML = legendHtml;
+  }
 
   /* 地图容器大小可能在隐藏时算错，打开时修正 */
   if (_mapPendingOpen) {
