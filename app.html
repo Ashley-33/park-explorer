@@ -6,6 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#5B8A6E" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <!-- 百度统计 -->
@@ -4013,7 +4014,8 @@ function _initMap() {
   L.tileLayer('https://wprd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=7&scl=1&x={x}&y={y}&z={z}', {
     attribution: '&copy; 高德地图',
     maxZoom: 18,
-    subdomains: ['1','2','3','4']
+    subdomains: ['1','2','3','4'],
+    crossOrigin: false
   }).addTo(_mapInstance);
 
   var sorted = PLACES.slice().sort(function(a,b){ return (a._distance||999)-(b._distance||999); });
