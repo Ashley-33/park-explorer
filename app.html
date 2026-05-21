@@ -4007,7 +4007,7 @@ function _initMap() {
 
   _mapInstance = L.map('leaflet-map', {
     center: [userLocation.lat, userLocation.lng],
-    zoom: 13,
+    zoom: 12,
     zoomControl: true
   });
 
@@ -4062,7 +4062,17 @@ function _initMap() {
     }).addTo(_mapInstance).bindPopup(pop));
   }
 
-  if (_mapMarkers.length > 0) { try { _mapInstance.fitBounds(L.featureGroup(_mapMarkers).getBounds().pad(0.25)); } catch(e){} }
+  /* 以用户位置为中心，展示周边 15km */
+  try {
+    var rKm = 15;
+    var latDeg = rKm / 111.32;
+    var lngDeg = rKm / (111.32 * Math.cos(userLocation.lat * Math.PI / 180));
+    var bnds = [
+      [userLocation.lat - latDeg, userLocation.lng - lngDeg],
+      [userLocation.lat + latDeg, userLocation.lng + lngDeg]
+    ];
+    _mapInstance.fitBounds(bnds);
+  } catch(e){}
 
   var html = '';
   for (var j = 0; j < topPlaces.length; j++) {
