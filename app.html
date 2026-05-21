@@ -183,12 +183,13 @@
       -webkit-line-clamp:3;overflow:hidden;max-height:74px;}
     .place-facilities { display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px; }
     .place-size { font-size:11.5px;color:var(--tx-muted);line-height:1.4;margin-bottom:8px;padding-left:1px;font-weight:450; }
-    .place-cat-row { display:flex;align-items:center;gap:6px;margin-bottom:9px; }
+    .place-cat-row { display:none; }
     .cat-chip { font-size:11px;font-weight:600;padding:2px 9px;border-radius:10px;
       background:#E8F5E9;color:#2E7D32;white-space:nowrap;letter-spacing:.3px; }
     .cat-chip.cat-play { background:#FFF3E0;color:#E65100; }
     .cat-chip.cat-nature { background:#E3F2FD;color:#1565C0; }
     .cat-chip.cat-street { background:#F3E5F5;color:#7B1FA2; }
+    .cat-chip.cat-exhibit { background:#FFF8E1;color:#E65100; }
     .scene-badge { font-size:10px;font-weight:600;padding:1px 7px;border-radius:8px;
       background:#FFEBEE;color:#C62828;margin-left:auto; }
 
@@ -196,6 +197,12 @@
     .facility-mini { font-size:11px;padding:3px 9px;border-radius:14px;font-weight:500;
       border:1px solid var(--bd);color:var(--tx-secondary);background:var(--mist);transition:transform .12s ease; }
     .facility-mini:hover { transform:scale(1.04); }
+    .fac-sand { background:#FFF8E1;border-color:rgba(255,183,77,0.5);color:#E65100; }
+    .fac-play { background:#FCE4EC;border-color:rgba(240,98,146,0.45);color:#C2185B; }
+    .fac-water { background:#E3F2FD;border-color:rgba(100,181,246,0.45);color:#1976D2; }
+    .fac-lawn { background:#E8F5E9;border-color:rgba(129,199,132,0.45);color:#388E3C; }
+    .fac-bike { background:#F3E5F5;border-color:rgba(186,104,200,0.45);color:#8E24AA; }
+    .fac-indoor { background:#E8EAF6;border-color:rgba(121,134,203,0.45);color:#3949AB; }
     .place-footer { display:flex;align-items:center;justify-content:space-between;
       padding-top:9px;border-top:1px solid var(--bd);margin-top:1px; }
     .parking-hint { display:flex;align-items:center;gap:5px;font-size:12px;color:var(--tx-secondary);font-weight:450; }
@@ -454,6 +461,7 @@
         <div class="cat-tag" data-category="游乐场">🎠 游乐</div>
         <div class="cat-tag" data-category="自然探索">⛰️ 探索</div>
         <div class="cat-tag" data-category="街心公园">🌳 街心</div>
+        <div class="cat-tag" data-category="展馆">🏛️ 展馆</div>
       </div>
 
       <!-- 设施筛选栏 -->
@@ -463,7 +471,8 @@
         <div class="filter-tag" data-filter="无动力">无动力</div>
         <div class="filter-tag" data-filter="戏水区">戏水</div>
         <div class="filter-tag" data-filter="大草坪">草坪</div>
-        <div class="filter-tag" data-filter="骑行道">骑行</div>
+        <div class="filter-tag" data-filter="骑行道">骑行道</div>
+        <div class="filter-tag" data-filter="室内">室内</div>
       </div>
     </div>
 
@@ -518,11 +527,11 @@
 /* ==========================================
    常量
 ========================================= */
-var VALID_FACILITIES = ["沙坑","无动力","戏水区","大草坪","骑行道"];
+var VALID_FACILITIES = ["沙坑","无动力","戏水区","大草坪","骑行道","室内"];
 /* 设施显示名称映射（筛选栏/卡片/详情页统一使用短名） */
 var facilityDisplayNames = {"沙坑":"沙坑","无动力":"无动力","戏水区":"戏水","大草坪":"草坪"};
 function displayName(f) { return facilityDisplayNames[f] || f; }
-var facilityEmoji = {"沙坑":"🏖️","游乐设施":"🛝","戏水区":"💧","大草坪":"🌱","骑行道":"🚲","树荫":"🌳","景观绿地":"🌿","野趣树林":"🌲","白沙滩":"🏖️","儿童游乐区":"🛝","小型沙坑":"🏖️","健身设施":"🏋️","休闲绿地":"🌿","梯田":"🌾","稻田":"🌾","观景台":"🔭","水系":"💧","栈道":"🪵","滨水景观":"🏞️","露营地":"⛺","平缓木栈道":"🪵","溪流":"💧","溯溪":"🌊","环山木栈道":"🥾","山林绿植":"🌲"};
+var facilityEmoji = {"沙坑":"🏖️","游乐设施":"🛝","戏水区":"💧","大草坪":"🌱","骑行道":"🚲","树荫":"🌳","景观绿地":"🌿","野趣树林":"🌲","白沙滩":"🏖️","儿童游乐区":"🛝","小型沙坑":"🏖️","健身设施":"🏋️","休闲绿地":"🌿","梯田":"🌾","稻田":"🌾","观景台":"🔭","水系":"💧","栈道":"🪵","滨水景观":"🏞️","露营地":"⛺","平缓木栈道":"🪵","溪流":"💧","溯溪":"🌊","环山木栈道":"🥾","山林绿植":"🌲","室内":"🏠"};
 
 /* 骰子文案（提前声明，确保随时可用） */
 var dicePhrases = ["今天就去这里吧！🌟","运气不错，试试这个！✨","这个选择很靠谱！💪","走起，别犹豫！🏃","今日份好运已送达 🍀","这个公园会给你惊喜的！🎁"];
@@ -3247,6 +3256,7 @@ function renderNextBatch() {
         else if (fac[j] === '戏水区') facClass = 'fac-water';
         else if (fac[j] === '大草坪') facClass = 'fac-lawn';
         else if (fac[j] === '骑行道') facClass = 'fac-bike';
+        else if (fac[j] === '室内') facClass = 'fac-indoor';
         html += '<span class="facility-mini '+facClass+'">'+emoji(fac[j])+' '+displayName(fac[j])+'</span>';
       }
     }
@@ -3267,6 +3277,7 @@ function renderNextBatch() {
     if (cat === '游乐场') catCls += ' cat-play';
     else if (cat === '自然探索') catCls += ' cat-nature';
     else if (cat === '街心公园') catCls += ' cat-street';
+    else if (cat === '展馆') catCls += ' cat-exhibit';
     html += '<div class="place-cat-row">';
     html += '<span class="'+catCls+'">'+cat+'</span>';
     if (p.scene === '室内') html += '<span class="scene-badge">室内</span>';
@@ -4014,7 +4025,8 @@ function _initMap() {
     '户外公园': '#07C160',
     '游乐场': '#FF7043',
     '自然探索': '#42A5F5',
-    '街心公园': '#AB47BC'
+    '街心公园': '#AB47BC',
+    '展馆': '#FFA726'
   };
   function catColor(cat) { return CAT_COLORS[cat] || '#9BC5A0'; }
 
@@ -4071,7 +4083,7 @@ function _initMap() {
 
   /* 分类图例 */
   var legendHtml = '<div class="map-legend"><div class="map-legend-title">🏷️ 公园分类</div>';
-  var catOrder = ['户外公园','游乐场','自然探索','街心公园'];
+  var catOrder = ['户外公园','游乐场','自然探索','街心公园','展馆'];
   for (var ci = 0; ci < catOrder.length; ci++) {
     legendHtml += '<div class="map-legend-item"><span class="map-legend-dot" style="background:'+CAT_COLORS[catOrder[ci]]+'"></span>'+catOrder[ci]+'</div>';
   }
