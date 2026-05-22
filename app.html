@@ -4057,16 +4057,16 @@ function _initMap() {
     var d = p._distance !== null ? p._distance.toFixed(1) : '?';
     var facs = (p.facilities||[]).filter(function(f){return VALID_FACILITIES.indexOf(f)!==-1;}).slice(0,5);
     var catLabel = p.category || '户外公园';
-    var pop = '<div style="min-width:200px;font-size:13px;line-height:1.5;">'
+    var pop = '<div style="min-width:220px;font-size:13px;line-height:1.5;">'
       + '<b style="font-size:14px;">'+p.name+'</b>'
       + '<br/><span style="color:'+catColor(catLabel)+';font-weight:600;">🚶 '+d+' km &nbsp;'+p.cost+'</span>'
       + '<br/>🏷️ '+catLabel
       + '<br/>📍 '+p.address;
     if (facs.length > 0) pop += '<br/><br/>🏸 '+facs.join('、');
     if (p.note) pop += '<br/><br/><span style="color:#666;font-size:12px;">'+p.note.substring(0,80)+(p.note.length>80?'...':'')+'</span>';
-    pop += '<br/><div style="margin-top:10px;text-align:right;">'
+    pop += '<br/><div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(0,0,0,.06);">'
       + '<a href="javascript:void(0)" onclick="openNavigation(window.__mapPlaces['+i+']);event.stopPropagation();return false;" '
-      + 'style="display:inline-block;background:#07C160;color:#fff;padding:5px 16px;border-radius:16px;font-size:12px;font-weight:600;text-decoration:none;">'
+      + 'style="display:flex;align-items:center;justify-content:center;gap:6px;background:#07C160;color:#fff;padding:10px 0;border-radius:14px;font-size:14px;font-weight:600;text-decoration:none;width:100%;box-sizing:border-box;box-shadow:0 2px 8px rgba(7,193,96,.25);-webkit-tap-highlight-color:transparent;">'
       + '🧭 导航</a></div>';
     pop += '</div>';
     _mapMarkers.push(L.circleMarker([p.lat, p.lng], {
