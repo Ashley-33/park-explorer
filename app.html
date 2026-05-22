@@ -4049,18 +4049,25 @@ function _initMap() {
   });
   _mapMarkers.push(L.marker([userLocation.lat, userLocation.lng], {icon: _tuotuoIcon, zIndexOffset: 999}).addTo(_mapInstance).bindPopup('<b>📍 妥妥在这里</b>'));
 
+  /* 存入全局供弹窗/列表的导航按钮调用 */
+  window.__mapPlaces = topPlaces;
+
   for (var i = 0; i < topPlaces.length; i++) {
     var p = topPlaces[i];
     var d = p._distance !== null ? p._distance.toFixed(1) : '?';
     var facs = (p.facilities||[]).filter(function(f){return VALID_FACILITIES.indexOf(f)!==-1;}).slice(0,5);
     var catLabel = p.category || '户外公园';
-    var pop = '<div style="min-width:180px;font-size:13px;line-height:1.5;">'
+    var pop = '<div style="min-width:200px;font-size:13px;line-height:1.5;">'
       + '<b style="font-size:14px;">'+p.name+'</b>'
       + '<br/><span style="color:'+catColor(catLabel)+';font-weight:600;">🚶 '+d+' km &nbsp;'+p.cost+'</span>'
       + '<br/>🏷️ '+catLabel
       + '<br/>📍 '+p.address;
     if (facs.length > 0) pop += '<br/><br/>🏸 '+facs.join('、');
     if (p.note) pop += '<br/><br/><span style="color:#666;font-size:12px;">'+p.note.substring(0,80)+(p.note.length>80?'...':'')+'</span>';
+    pop += '<br/><div style="margin-top:10px;text-align:right;">'
+      + '<a href="javascript:void(0)" onclick="openNavigation(window.__mapPlaces['+i+']);event.stopPropagation();return false;" '
+      + 'style="display:inline-block;background:#07C160;color:#fff;padding:5px 16px;border-radius:16px;font-size:12px;font-weight:600;text-decoration:none;">'
+      + '🧭 导航</a></div>';
     pop += '</div>';
     _mapMarkers.push(L.circleMarker([p.lat, p.lng], {
       radius: 8, fillColor: catColor(catLabel), color: '#fff', weight: 1.75, fillOpacity: 0.88
@@ -4094,6 +4101,7 @@ function _initMap() {
       + '<div class="map-place-dist">🚶 '+dj+' km &nbsp;&nbsp;'+pj.cost+'</div>'
       + '<div class="map-place-address">'+pj.address+'</div>'
       + '<div class="map-place-detail">'+detailNote+detailFac+'</div>'
+      + '<div style="text-align:right;margin-top:6px;"><a href="javascript:void(0)" onclick="openNavigation(window.__mapPlaces['+j+']);event.stopPropagation();return false;" style="display:inline-block;color:#07C160;font-size:12px;font-weight:600;text-decoration:none;padding:3px 10px;border:1px solid #07C160;border-radius:12px;">🧭 导航</a></div>'
       + '</div></div>';
   }
   document.getElementById('map-place-list').innerHTML = html;
