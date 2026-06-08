@@ -21,6 +21,8 @@
   </script>
   <meta http-equiv="Expires" content="0" />
   <title>遛呗 · 北京</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
   <!-- Leaflet CSS & JS（免费开源地图，无需 API key）-->
   <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <script src="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -95,13 +97,14 @@
     .home-header { background:var(--fog-green);
       padding:calc(env(safe-area-inset-top,18px)+10px) 20px 16px; }
     .header-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; margin-top: 10px; padding: 0 16px;}
-    .logo { display:flex; align-items:center; gap:10px; }
-    .logo-icon { width:34px;height:34px;border-radius:50%;overflow:hidden;
+    .logo { display:flex; align-items:center; gap:12px; }
+    .logo-icon { width:38px;height:38px;border-radius:50%;overflow:hidden;
       display:flex;align-items:center;justify-content:center;
-      border:1.5px solid rgba(255,255,255,0.25); }
+      border:1.5px solid rgba(255,255,255,0.25);flex-shrink:0; }
     .logo-icon img { width:100%;height:100%;object-fit:cover;border-radius:50%; }
-    .logo-text { font-size:17px;font-weight:700;color:#FFF;letter-spacing:-0.2px; }
-    .logo-sub { font-size:10.5px;color:rgba(255,255,255,0.65);margin-left:5px;margin-top:3px;letter-spacing:.5px; }
+    .logo-text-wrap { display:flex;flex-direction:column;align-items:flex-start;gap:2px; }
+    .logo-text { font-size:18px;font-weight:700;color:#FFF;letter-spacing:1px;line-height:1.2; }
+    .logo-sub { font-size:11px;color:rgba(255,255,255,0.7);letter-spacing:.8px;line-height:1.2; }
     .city-chip { display:flex;align-items:center;gap:5px;padding:5px 12px;
       background:rgba(255,255,255,0.15);border-radius:20px;font-size:12px;font-weight:500;
       color:rgba(255,255,255,0.9);cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
@@ -426,6 +429,26 @@
       animation:splashFadeIn .8s ease both;animation-delay:.2s; }
     .splash-sub { font-size:15px;color:rgba(255,255,255,0.88);letter-spacing:3px;font-weight:400;
       position:relative;z-index:1;animation:splashFadeIn .8s ease both;animation-delay:.5s; }
+    /* 天气芯片 */
+    .weather-chip { display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:16px;
+      background:rgba(255,255,255,0.18);color:#fff;font-size:12px;cursor:pointer;transition:background .15s;white-space:nowrap; }
+    .weather-chip:hover { background:rgba(255,255,255,0.28); }
+    .weather-chip span { line-height:1; }
+    #weather-temp { font-size:11.5px;font-weight:500; }
+    #weather-tier { font-size:11px; }
+
+    /* 穿衣建议面板 */
+    .weather-panel { margin:0 12px 10px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04); }
+    .wp-header { display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer; }
+    .wp-title { font-size:13px;font-weight:600;color:#1A2E24; }
+    .wp-toggle { font-size:11px;color:#8BA89D; }
+    .wp-body { padding:0 14px 12px; }
+    .wp-row { display:flex;gap:6px;font-size:12px;padding:3px 0; }
+    .wp-label { color:#5B8A6E;flex-shrink:0; }
+    .wp-value { color:#1A2E24; }
+    .wp-reminders { margin-top:8px;padding:8px 10px;background:#FFF8E1;border-radius:8px; }
+    .wp-reminder { font-size:11.5px;color:#C0762E; }
+
     @keyframes splashFadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
   </style>
 </head>
@@ -443,12 +466,18 @@
       <div class="header-top">
         <div class="logo">
           <div class="logo-icon"><img src="tuotuo.jpg" alt="tuotuo" /></div>
-          <div style="display:flex;align-items:baseline;gap:6px">
+          <div class="logo-text-wrap">
             <div class="logo-text">遛呗</div>
             <div class="logo-sub">今天去哪玩儿呢</div>
           </div>
         </div>
         <div class="city-chip" id="location-status" onclick="locateUser()" style="cursor:pointer" title="点击重新定位">📍 定位中...</div>
+        <div class="weather-chip" id="weather-chip" onclick="toggleWeatherPanel()" title="今日穿衣建议" style="display:none">
+          <span id="weather-icon">☀️</span>
+          <span id="weather-temp"></span>
+          <span id="weather-tier" style="opacity:.85"></span>
+          <span id="weather-arrow">▼</span>
+        </div>
         <div class="map-btn" id="map-btn" onclick="openMapLayer()" title="查看地图"><svg viewBox="0 0 36 36" width="28" height="28" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="36" height="36" rx="7" fill="#FFF3E0"/><path d="M4 2 L32 6 L30 30 L2 26Z" fill="#fff" stroke="#E0E0E0" stroke-width="1.2"/><path d="M12 3 L11 29" stroke="#EEE" stroke-width="1.3"/><path d="M22 4 L21 29.5" stroke="#EEE" stroke-width="1.3"/><ellipse cx="9" cy="11" rx="5" ry="3.5" fill="#C8E6C9" opacity=".65"/><ellipse cx="27" cy="24" rx="6" ry="4" fill="#A5D6A7" opacity=".55"/><path d="M6 17 Q13 13 18 16 T28 14" fill="none" stroke="#81D4FA" stroke-width="3" stroke-linecap="round" opacity=".55"/><g transform="translate(18,14)"><circle cx="0" cy="-1" r="9" fill="#FF5722" opacity=".15"/><path d="M0 -13 C-8 -13 -14 -7 -14 -1 C-14 7 0 20 0 20 C0 20 14 7 14 -1 C14 -7 8 -13 0 -13Z" fill="#FF5722"/><path d="M0 -10 C-6 -10 -11 -5 -11 -1 C-11 6 0 16 0 16 C0 16 11 6 11 -1 C11 -5 6 -10 0 -10Z" fill="#FF7043"/><circle cx="0" cy="0" r="3.5" fill="#fff"/></g></svg></div>
       </div>
       <div class="search-bar">
@@ -477,6 +506,18 @@
         <div class="filter-tag" data-filter="骑行道">骑行道</div>
         <div class="filter-tag" data-filter="室内">室内</div>
         <div class="filter-tag" data-filter="露营">露营</div>
+      </div>
+    </div>
+
+    <!-- 穿衣建议详情面板 -->
+    <div class="weather-panel" id="weather-panel" style="display:none">
+      <div class="wp-body">
+        <div class="wp-row"><span class="wp-label">👕 里层</span><span class="wp-value" id="wp-layers">-</span></div>
+        <div class="wp-row"><span class="wp-label">🧥 外套</span><span class="wp-value" id="wp-outer">-</span></div>
+        <div class="wp-row"><span class="wp-label">👖 下装</span><span class="wp-value" id="wp-pants">-</span></div>
+        <div class="wp-row"><span class="wp-label">👟 鞋袜</span><span class="wp-value" id="wp-shoes">-</span></div>
+        <div class="wp-row"><span class="wp-label">🎩 配饰</span><span class="wp-value" id="wp-accessories">-</span></div>
+        <div class="wp-reminders" id="wp-reminders"></div>
       </div>
     </div>
 
@@ -538,7 +579,154 @@ var VALID_FACILITIES = ["沙坑","无动力","戏水区","大草坪","骑行道"
 /* 设施显示名称映射（筛选栏/卡片/详情页统一使用短名） */
 var facilityDisplayNames = {"沙坑":"沙坑","无动力":"无动力","戏水区":"戏水","大草坪":"草坪"};
 function displayName(f) { return facilityDisplayNames[f] || f; }
-var facilityEmoji = {"沙坑":"🏖️","游乐设施":"🛝","戏水区":"💧","大草坪":"🌱","骑行道":"🚲","树荫":"🌳","景观绿地":"🌿","野趣树林":"🌲","白沙滩":"🏖️","儿童游乐区":"🛝","小型沙坑":"🏖️","健身设施":"🏋️","休闲绿地":"🌿","梯田":"🌾","稻田":"🌾","观景台":"🔭","水系":"💧","栈道":"🪵","滨水景观":"🏞️","露营地":"⛺","平缓木栈道":"🪵","溪流":"💧","溯溪":"🌊","环山木栈道":"🥾","山林绿植":"🌲","室内":"🏠","露营":"⛺"};
+var facilityEmoji = {"沙坑":"🏖️","无动力":"🛝","游乐设施":"🛝","戏水区":"💧","大草坪":"🌱","骑行道":"🚲","树荫":"🌳","景观绿地":"🌿","野趣树林":"🌲","白沙滩":"🏖️","儿童游乐区":"🛝","小型沙坑":"🏖️","健身设施":"🏋️","休闲绿地":"🌿","梯田":"🌾","稻田":"🌾","观景台":"🔭","水系":"💧","栈道":"🪵","滨水景观":"🏞️","露营地":"⛺","平缓木栈道":"🪵","溪流":"💧","溯溪":"🌊","环山木栈道":"🥾","山林绿植":"🌲","室内":"🏠","露营":"⛺"};
+
+
+/* =========================================
+   天气 & 穿衣建议（复用 kindergarten 项目）
+   ========================================= */
+
+/* 天气码 → 天气类型 */
+function codeToWeather(c) {
+  if (c === 0) return 'sunny';
+  if (c === 1 || c === 2) return 'cloudy';
+  if (c === 3 || c === 45 || c === 48) return 'overcast';
+  if ([95,96,99].includes(c)) return 'thunder';
+  if ([71,73,75,77,85,86].includes(c)) return 'snow';
+  if ([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(c)) return 'rain';
+  return 'cloudy';
+}
+
+/* 最高温 → 温度档位 */
+function tierOf(high) {
+  if (high >= 30) return 0;
+  if (high >= 26) return 1;
+  if (high >= 24) return 2;
+  if (high >= 17) return 3;
+  if (high >= 10) return 4;
+  if (high >= 5)  return 5;
+  if (high >= 0)  return 6;
+  return 7;
+}
+
+var TIER_NAME = ['盛夏炎热','温暖舒适','春日舒适','凉爽','春寒/初秋','初冬微凉','寒冬','极寒'];
+var WEATHER_ICON = {'sunny':'☀️','cloudy':'⛅','overcast':'☁️','rain':'🌧️','snow':'❄️','thunder':'⛈️','windy':'💨'};
+var WEATHER_NAME = {'sunny':'晴','cloudy':'多云','overcast':'阴','rain':'雨','snow':'雪','thunder':'雷阵雨','windy':'大风'};
+
+/* 获取天气数据并生成穿衣建议 */
+function fetchWeather(lat, lon, cb) {
+  var url = 'https://api.open-meteo.com/v1/forecast'
+    + '?latitude=' + lat
+    + '&longitude=' + lon
+    + '&daily=temperature_2m_max,temperature_2m_min,weather_code,windspeed_10m_max'
+    + '&timezone=auto&forecast_days=1';
+  fetch(url).then(function(r){return r.json();}).then(function(data){
+    if (!data || !data.daily) { cb && cb(null); return; }
+    var d = data.daily;
+    var hiTemp = Math.round(d.temperature_2m_max[0]);
+    var loTemp = Math.round(d.temperature_2m_min[0]);
+    var wcode = d.weather_code[0];
+    var wind = (d.windspeed_10m_max && d.windspeed_10m_max[0]) || 0;
+    var w = codeToWeather(wcode);
+    if (w === 'sunny' && wind >= 35) w = 'windy';
+    var suggestion = buildSuggestion(hiTemp, loTemp, w);
+    cb && cb({
+      icon: WEATHER_ICON[w] || '⛅',
+      temp: loTemp + '~' + hiTemp + '°C',
+      desc: WEATHER_NAME[w] || '',
+      suggestion: suggestion
+    });
+  }).catch(function(err){ console.error('fetchWeather err:', err); cb && cb(null); });
+}
+
+/* 根据温度/天气生成穿衣建议 */
+function buildSuggestion(hiTemp, loTemp, weather) {
+  var tier = tierOf(hiTemp);
+  var diff = hiTemp - loTemp;
+  var s = { tierName: TIER_NAME[tier], temp: loTemp + '~' + hiTemp + '°C', reminders: [] };
+
+  if (tier === 0) {
+    s.layers = '短袖T恤';
+    s.outer = '轻薄防晒衣';
+    s.pants = '防蚊裤';
+    s.shoes = '网眼袜＋透气夏鞋';
+    s.accessories = '防晒帽';
+  } else if (tier === 1) {
+    s.layers = '短袖/长袖T恤';
+    s.outer = '春夹克/风衣';
+    s.pants = '薄运动裤';
+    s.shoes = '薄棉袜＋运动鞋';
+    s.accessories = '棒球帽';
+  } else if (tier === 2) {
+    s.layers = '长袖T恤';
+    s.outer = '春夹克/牛仔外套';
+    s.pants = '薄运动裤/牛仔裤';
+    s.shoes = '薄棉袜＋运动鞋';
+    s.accessories = '棒球帽（按需）';
+  } else if (tier === 3) {
+    s.layers = '长袖T恤';
+    s.outer = '春夹克/风衣';
+    s.pants = '运动裤/软壳冲锋裤';
+    s.shoes = '薄棉袜＋运动鞋';
+  } else if (tier === 4) {
+    s.layers = '普通秋衣＋薄卫衣';
+    s.outer = '30g羽绒/加绒冲锋衣';
+    s.pants = '薄秋裤＋长裤';
+    s.shoes = '薄棉袜＋运动鞋';
+  } else if (tier === 5) {
+    s.layers = '200g纯棉秋衣＋卫衣';
+    s.outer = '中厚羽绒服（充绒约90g）';
+    s.pants = '秋裤＋防风裤';
+    s.shoes = '厚袜＋防滑运动鞋';
+    s.accessories = '护耳帽＋围巾';
+  } else if (tier === 6) {
+    s.layers = '300g/德绒秋衣＋摇粒绒';
+    s.outer = '厚羽绒服（充绒100~110g）';
+    s.pants = '德绒秋裤＋加绒裤';
+    s.shoes = '纯棉厚袜＋防滑保暖鞋';
+    s.accessories = '护耳帽＋围巾＋保暖手套';
+  } else {
+    s.layers = '德绒厚秋衣＋中厚摇粒绒';
+    s.outer = '厚羽绒服（充绒120~130g）';
+    s.pants = '德绒秋裤＋加绒卫裤';
+    s.shoes = '纯棉厚袜＋防滑保暖鞋';
+    s.accessories = '护耳帽＋围巾＋防水手套';
+  }
+
+  if (weather === 'rain' || weather === 'thunder') {
+    s.outer = '防雨风衣' + (tier >= 5 ? '/防水羽绒服' : '');
+    s.reminders.push('今天有雨，记得带伞 ☂️');
+  }
+  if (weather === 'snow') {
+    s.outer = '防水厚羽绒服';
+    s.shoes = '防滑雪地鞋';
+    s.accessories = (s.accessories || '') + '＋防水手套';
+    s.reminders.push('雪天路滑，注意安全 ⛄');
+  }
+  if (weather === 'windy') {
+    s.reminders.push('今天风大，外套建议选有拉链款 💨');
+  }
+  if (diff >= 9) {
+    s.reminders.push('昼夜温差' + diff + '℃，注意灵活增减衣物');
+  }
+  var now = new Date();
+  var m = now.getMonth() + 1;
+  if (m >= 3 && m <= 5) s.reminders.push('春季花粉浓度高，过敏儿童注意防护 🌸');
+  if (m >= 9 && m <= 10) s.reminders.push('秋季花粉浓度高，过敏儿童注意防护 🍂');
+
+  return s;
+}
+
+/* 天气面板状态 */
+var _weatherOpen = false;
+
+function toggleWeatherPanel() {
+  _weatherOpen = !_weatherOpen;
+  var panel = document.getElementById('weather-panel');
+  if (panel) panel.style.display = _weatherOpen ? 'block' : 'none';
+  var arrow = document.getElementById('weather-arrow');
+  if (arrow) arrow.textContent = _weatherOpen ? '▲' : '▼';
+}
 
 /* 骰子文案（提前声明，确保随时可用） */
 var dicePhrases = ["今天就去这里吧！🌟","运气不错，试试这个！✨","这个选择很靠谱！💪","走起，别犹豫！🏃","今日份好运已送达 🍀","这个公园会给你惊喜的！🎁"];
@@ -3147,6 +3335,51 @@ function locateUser() {
   /* 连续采样最多3次，取精度最高的 */
   var maxSamples = 3;
 
+  /* 共用：天气回调 —— 更新天气芯片 + 穿衣建议面板 */
+  function _onWeather(data) {
+    if (!data) return;
+    var chip = document.getElementById('weather-chip');
+    if (chip) chip.style.display = 'flex';
+    var iconEl = document.getElementById('weather-icon');
+    if (iconEl) iconEl.textContent = data.icon;
+    var tempEl = document.getElementById('weather-temp');
+    if (tempEl) tempEl.textContent = data.temp;
+    var tierChipEl = document.getElementById('weather-tier');
+    if (tierChipEl) tierChipEl.textContent = data.suggestion ? data.suggestion.tierName : '';
+    var s = data.suggestion;
+    if (!s) return;
+    var layersEl = document.getElementById('wp-layers');
+    if (layersEl) layersEl.textContent = s.layers || '';
+    var outerEl = document.getElementById('wp-outer');
+    if (outerEl) outerEl.textContent = s.outer || '';
+    var pantsEl = document.getElementById('wp-pants');
+    if (pantsEl) pantsEl.textContent = s.pants || '';
+    var shoesEl = document.getElementById('wp-shoes');
+    if (shoesEl) shoesEl.textContent = s.shoes || '';
+    var accEl = document.getElementById('wp-accessories');
+    if (accEl) accEl.textContent = s.accessories || '';
+    var remEl = document.getElementById('wp-reminders');
+    if (remEl) {
+      remEl.innerHTML = '';
+      if (s.reminders && s.reminders.length > 0) {
+        s.reminders.forEach(function(r) {
+          var d = document.createElement('div');
+          d.className = 'wp-reminder';
+          d.textContent = '⚠️ ' + r;
+          remEl.appendChild(d);
+        });
+        remEl.style.display = 'block';
+      } else {
+        remEl.style.display = 'none';
+      }
+    }
+    _weatherOpen = false;
+    var panel = document.getElementById('weather-panel');
+    if (panel) panel.style.display = 'none';
+    var arrow = document.getElementById('weather-arrow');
+    if (arrow) arrow.textContent = '▼';
+  }
+
   function tryLocate() {
     _locAttempts++;
     navigator.geolocation.getCurrentPosition(
@@ -3179,6 +3412,8 @@ function locateUser() {
         locEl.innerHTML = '<span style="color:#FFE0E0">📍 ' + msg + '</span>';
         renderHomeList(getFilteredPlaces());
         setTimeout(preloadMap, 1500);
+        /* 拉取天气 */
+        fetchWeather(userLocation.lat, userLocation.lng, _onWeather);
       },
       /* 关键参数：不用缓存(maxAge=0)、高精度、12秒超时 */
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
@@ -3193,6 +3428,9 @@ function locateUser() {
     locEl.innerHTML = '<span style="color:#FFFFFF">' + accText + ' 已定位(±' + Math.round(_bestPos.accuracy) + 'm)</span>';
     renderHomeList(getFilteredPlaces());
     setTimeout(preloadMap, 1500);
+
+    /* 获取天气 & 穿衣建议 */
+    fetchWeather(_bestPos.lat, _bestPos.lng, _onWeather);
   }
 
   tryLocate();
@@ -4166,5 +4404,123 @@ function toggleMapPlace(el) {
   if (detail) detail.classList.toggle('show');
 }
 </script>
+
+<!-- 添加到主屏引导 -->
+<div id="pwa-install-bar" class="pwa-bar" style="display:none">
+  <div class="pwa-bar-inner">
+    <img src="icon-192.png" class="pwa-icon" alt="遛呗" />
+    <div class="pwa-text">
+      <div class="pwa-title">把「遛呗」添加到主屏幕</div>
+      <div class="pwa-sub" id="pwa-sub">一键直达，离线也能用</div>
+    </div>
+    <button class="pwa-btn" id="pwa-btn" onclick="handlePWAInstall()">添加</button>
+    <span class="pwa-close" onclick="dismissPWABar()">✕</span>
+  </div>
+</div>
+
+<!-- iOS 添加引导浮层 -->
+<div id="pwa-ios-guide" class="pwa-ios-modal" style="display:none" onclick="closeIOSGuide()">
+  <div class="pwa-ios-card" onclick="event.stopPropagation()">
+    <div class="pwa-ios-title">添加到主屏幕</div>
+    <div class="pwa-ios-step">
+      <span class="pwa-num">1</span>
+      <span>点击底部 Safari 工具栏的 <b>分享按钮</b> <span style="font-size:18px">📤</span></span>
+    </div>
+    <div class="pwa-ios-step">
+      <span class="pwa-num">2</span>
+      <span>向上滑动，找到 <b>「添加到主屏幕」</b></span>
+    </div>
+    <div class="pwa-ios-step">
+      <span class="pwa-num">3</span>
+      <span>点击 <b>「添加」</b> 完成</span>
+    </div>
+    <button class="pwa-ios-ok" onclick="closeIOSGuide()">知道了</button>
+  </div>
+</div>
+
+<script>
+/* ===== PWA 添加到主屏 ===== */
+var _pwaDeferredPrompt = null;
+var _pwaDismissed = false;
+
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  _pwaDeferredPrompt = e;
+  if (!_pwaDismissed && !isStandalone()) showPWABar('android');
+});
+
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
+}
+
+function showPWABar(type) {
+  var bar = document.getElementById('pwa-install-bar');
+  if (!bar) return;
+  var sub = document.getElementById('pwa-sub');
+  if (sub) sub.textContent = type === 'ios' ? '像 App 一样使用，一键直达' : '一键直达，离线也能用';
+  var btn = document.getElementById('pwa-btn');
+  if (btn) btn.textContent = type === 'ios' ? '查看方法' : '添加';
+  bar.style.display = 'block';
+}
+
+function dismissPWABar() {
+  _pwaDismissed = true;
+  var bar = document.getElementById('pwa-install-bar');
+  if (bar) bar.style.display = 'none';
+}
+
+function handlePWAInstall() {
+  if (_pwaDeferredPrompt) {
+    _pwaDeferredPrompt.prompt();
+    _pwaDeferredPrompt.userChoice.then(function(choice) {
+      _pwaDeferredPrompt = null;
+      dismissPWABar();
+    });
+  } else if (isIOS()) {
+    document.getElementById('pwa-ios-guide').style.display = 'flex';
+    dismissPWABar();
+  }
+}
+
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
+function closeIOSGuide() {
+  var m = document.getElementById('pwa-ios-guide');
+  if (m) m.style.display = 'none';
+}
+
+/* 页面加载后检测：iOS 未安装则显示引导 */
+window.addEventListener('load', function() {
+  if (isStandalone() || _pwaDismissed) return;
+  if (isIOS()) {
+    setTimeout(function() { showPWABar('ios'); }, 1200);
+  }
+});
+</script>
+
+<style>
+/* PWA 引导条 */
+.pwa-bar { position:fixed; bottom:0; left:0; right:0; z-index:9999; padding:8px 12px 12px; background:rgba(255,255,255,.96); backdrop-filter:blur(10px); border-top:1px solid rgba(0,0,0,.06); box-shadow:0 -2px 12px rgba(0,0,0,.08); animation:pwaSlideUp .35s ease; }
+@keyframes pwaSlideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.pwa-bar-inner { display:flex; align-items:center; gap:10px; max-width:420px; margin:0 auto; }
+.pwa-icon { width:40px; height:40px; border-radius:10px; flex-shrink:0; }
+.pwa-text { flex:1; min-width:0; }
+.pwa-title { font-size:13.5px; font-weight:650; color:#1A2E24; }
+.pwa-sub { font-size:11.5px; color:#7A8F82; margin-top:1px; }
+.pwa-btn { padding:6px 14px; border-radius:20px; border:none; background:#5B8A6E; color:#fff; font-size:12.5px; font-weight:600; cursor:pointer; flex-shrink:0; }
+.pwa-close { font-size:16px; color:#9AA8A0; cursor:pointer; padding:4px; flex-shrink:0; }
+
+/* iOS 引导浮层 */
+.pwa-ios-modal { position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; padding:20px; }
+.pwa-ios-card { background:#fff; border-radius:16px; padding:20px 22px; max-width:320px; width:100%; box-shadow:0 8px 32px rgba(0,0,0,.15); }
+.pwa-ios-title { font-size:16px; font-weight:700; color:#1A2E24; text-align:center; margin-bottom:16px; }
+.pwa-ios-step { display:flex; align-items:flex-start; gap:10px; font-size:13.5px; color:#2E4A3E; margin-bottom:12px; line-height:1.5; }
+.pwa-num { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:#E8F5E9; color:#5B8A6E; font-size:12px; font-weight:700; flex-shrink:0; }
+.pwa-ios-ok { display:block; width:100%; margin-top:8px; padding:10px; border-radius:10px; border:none; background:#5B8A6E; color:#fff; font-size:14px; font-weight:600; cursor:pointer; }
+</style>
+
 </body>
 </html>
