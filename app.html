@@ -427,11 +427,12 @@
     .splash-sub { font-size:15px;color:rgba(255,255,255,0.88);letter-spacing:3px;font-weight:400;
       position:relative;z-index:1;animation:splashFadeIn .8s ease both;animation-delay:.5s; }
     /* 天气芯片 */
-    .weather-chip { display:flex;align-items:center;gap:3px;padding:5px 10px;border-radius:16px;
-      background:rgba(255,255,255,0.18);color:#fff;font-size:12px;cursor:pointer;transition:background .15s; }
+    .weather-chip { display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:16px;
+      background:rgba(255,255,255,0.18);color:#fff;font-size:12px;cursor:pointer;transition:background .15s;white-space:nowrap; }
     .weather-chip:hover { background:rgba(255,255,255,0.28); }
     .weather-chip span { line-height:1; }
     #weather-temp { font-size:11.5px;font-weight:500; }
+    #weather-tier { font-size:11px; }
 
     /* 穿衣建议面板 */
     .weather-panel { margin:0 12px 10px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04); }
@@ -471,6 +472,7 @@
         <div class="weather-chip" id="weather-chip" onclick="toggleWeatherPanel()" title="今日穿衣建议" style="display:none">
           <span id="weather-icon">☀️</span>
           <span id="weather-temp"></span>
+          <span id="weather-tier" style="opacity:.85"></span>
           <span id="weather-arrow">▼</span>
         </div>
         <div class="map-btn" id="map-btn" onclick="openMapLayer()" title="查看地图"><svg viewBox="0 0 36 36" width="28" height="28" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="36" height="36" rx="7" fill="#FFF3E0"/><path d="M4 2 L32 6 L30 30 L2 26Z" fill="#fff" stroke="#E0E0E0" stroke-width="1.2"/><path d="M12 3 L11 29" stroke="#EEE" stroke-width="1.3"/><path d="M22 4 L21 29.5" stroke="#EEE" stroke-width="1.3"/><ellipse cx="9" cy="11" rx="5" ry="3.5" fill="#C8E6C9" opacity=".65"/><ellipse cx="27" cy="24" rx="6" ry="4" fill="#A5D6A7" opacity=".55"/><path d="M6 17 Q13 13 18 16 T28 14" fill="none" stroke="#81D4FA" stroke-width="3" stroke-linecap="round" opacity=".55"/><g transform="translate(18,14)"><circle cx="0" cy="-1" r="9" fill="#FF5722" opacity=".15"/><path d="M0 -13 C-8 -13 -14 -7 -14 -1 C-14 7 0 20 0 20 C0 20 14 7 14 -1 C14 -7 8 -13 0 -13Z" fill="#FF5722"/><path d="M0 -10 C-6 -10 -11 -5 -11 -1 C-11 6 0 16 0 16 C0 16 11 6 11 -1 C11 -5 6 -10 0 -10Z" fill="#FF7043"/><circle cx="0" cy="0" r="3.5" fill="#fff"/></g></svg></div>
@@ -504,13 +506,9 @@
       </div>
     </div>
 
-    <!-- 穿衣建议面板（可展开） -->
+    <!-- 穿衣建议详情面板 -->
     <div class="weather-panel" id="weather-panel" style="display:none">
-      <div class="wp-header" onclick="toggleWeatherPanel()">
-        <span class="wp-title">👚 今日穿衣建议 · <span id="wp-tier">-</span></span>
-        <span class="wp-toggle" id="weather-arrow">▼</span>
-      </div>
-      <div class="wp-body" id="weather-panel-body" style="display:none">
+      <div class="wp-body">
         <div class="wp-row"><span class="wp-label">👕 里层</span><span class="wp-value" id="wp-layers">-</span></div>
         <div class="wp-row"><span class="wp-label">🧥 外套</span><span class="wp-value" id="wp-outer">-</span></div>
         <div class="wp-row"><span class="wp-label">👖 下装</span><span class="wp-value" id="wp-pants">-</span></div>
@@ -622,27 +620,27 @@ function fetchWeather(lat, lon, cb) {
   fetch(url).then(function(r){return r.json();}).then(function(data){
     if (!data || !data.daily) { cb && cb(null); return; }
     var d = data.daily;
-    var hi = Math.round(d.temperature_2m_max[0]);
-    var lo = Math.round(d.temperature_2m_min[0]);
+    var hiTemp = Math.round(d.temperature_2m_max[0]);
+    var loTemp = Math.round(d.temperature_2m_min[0]);
     var wcode = d.weather_code[0];
-    var wind = d.windspeed_10m_max ? d.windspeed_10m_max[0] : 0;
+    var wind = (d.windspeed_10m_max && d.windspeed_10m_max[0]) || 0;
     var w = codeToWeather(wcode);
     if (w === 'sunny' && wind >= 35) w = 'windy';
-    var suggestion = buildSuggestion(hi, lo, w);
+    var suggestion = buildSuggestion(hiTemp, loTemp, w);
     cb && cb({
       icon: WEATHER_ICON[w] || '⛅',
-      temp: lo + '~' + hi + '°C',
+      temp: loTemp + '~' + hiTemp + '°C',
       desc: WEATHER_NAME[w] || '',
       suggestion: suggestion
     });
-  }).catch(function(){ cb && cb(null); });
+  }).catch(function(err){ console.error('fetchWeather err:', err); cb && cb(null); });
 }
 
 /* 根据温度/天气生成穿衣建议 */
-function buildSuggestion(hi, lo, weather) {
-  var tier = tierOf(hi);
-  var diff = hi - lo;
-  var s = { tierName: TIER_NAME[tier], temp: lo + '~' + hi + '°C', reminders: [] };
+function buildSuggestion(hiTemp, loTemp, weather) {
+  var tier = tierOf(hiTemp);
+  var diff = hiTemp - loTemp;
+  var s = { tierName: TIER_NAME[tier], temp: loTemp + '~' + hiTemp + '°C', reminders: [] };
 
   if (tier === 0) {
     s.layers = '短袖T恤';
@@ -721,7 +719,7 @@ var _weatherOpen = false;
 
 function toggleWeatherPanel() {
   _weatherOpen = !_weatherOpen;
-  var panel = document.getElementById('weather-panel-body');
+  var panel = document.getElementById('weather-panel');
   if (panel) panel.style.display = _weatherOpen ? 'block' : 'none';
   var arrow = document.getElementById('weather-arrow');
   if (arrow) arrow.textContent = _weatherOpen ? '▲' : '▼';
@@ -3391,11 +3389,11 @@ function locateUser() {
       if (iconEl) iconEl.textContent = data.icon;
       var tempEl = document.getElementById('weather-temp');
       if (tempEl) tempEl.textContent = data.temp;
+      var tierChipEl = document.getElementById('weather-tier');
+      if (tierChipEl) tierChipEl.textContent = data.suggestion ? data.suggestion.tierName : '';
       /* 更新穿衣建议面板 */
       var s = data.suggestion;
       if (!s) return;
-      var tierEl = document.getElementById('wp-tier');
-      if (tierEl) tierEl.textContent = s.tierName;
       var layersEl = document.getElementById('wp-layers');
       if (layersEl) layersEl.textContent = s.layers || '';
       var outerEl = document.getElementById('wp-outer');
@@ -3422,9 +3420,12 @@ function locateUser() {
           remEl.style.display = 'none';
         }
       }
-      /* 显示天气面板 */
+      /* 面板默认收起，点击天气芯片展开 */
+      _weatherOpen = false;
       var panel = document.getElementById('weather-panel');
-      if (panel) panel.style.display = 'block';
+      if (panel) panel.style.display = 'none';
+      var arrow = document.getElementById('weather-arrow');
+      if (arrow) arrow.textContent = '▼';
     });
   }
 
