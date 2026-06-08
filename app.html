@@ -430,10 +430,10 @@
     .splash-sub { font-size:15px;color:rgba(255,255,255,0.88);letter-spacing:3px;font-weight:400;
       position:relative;z-index:1;animation:splashFadeIn .8s ease both;animation-delay:.5s; }
     /* 天气信息条 */
-    .weather-bar { display:flex;align-items:center;gap:6px;padding:8px 14px;margin:6px 12px 2px;
-      background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);
+    .weather-bar { display:flex;align-items:center;gap:6px;padding:8px 14px;margin:6px 16px 4px;
+      background:#F0F7F2;border-radius:10px;border:1px solid rgba(91,138,110,.12);
       font-size:13px;color:#1A2E24;cursor:pointer;transition:background .15s; }
-    .weather-bar:hover { background:#F8FBF9; }
+    .weather-bar:hover { background:#E8F2EB; }
     .wb-icon { font-size:15px; }
     .wb-temp { font-weight:600;color:#5B8A6E; }
     .wb-tier { color:#8BA89D;font-size:12px; }
@@ -482,14 +482,6 @@
         <div class="dice-btn" id="dice-btn" onclick="rollDice()">🎲</div>
       </div>
 
-      <!-- 天气信息条 -->
-      <div class="weather-bar" id="weather-bar" onclick="toggleWeatherPanel()" style="display:none">
-        <span class="wb-icon" id="weather-icon">☀️</span>
-        <span class="wb-temp" id="weather-temp"></span>
-        <span class="wb-tier" id="weather-tier"></span>
-        <span class="wb-arrow" id="weather-arrow">▼</span>
-      </div>
-
       <!-- 分类筛选栏（已隐藏） -->
       <div class="filter-bar" id="category-bar" style="padding:8px 16px 10px;display:none">
         <div class="cat-tag active" data-category="all">全部</div>
@@ -510,6 +502,14 @@
         <div class="filter-tag" data-filter="骑行道">骑行道</div>
         <div class="filter-tag" data-filter="室内">室内</div>
         <div class="filter-tag" data-filter="露营">露营</div>
+      </div>
+
+      <!-- 天气信息条 -->
+      <div class="weather-bar" id="weather-bar" onclick="toggleWeatherPanel()" style="display:none">
+        <span class="wb-icon" id="weather-icon">☀️</span>
+        <span class="wb-temp" id="weather-temp"></span>
+        <span class="wb-tier" id="weather-tier"></span>
+        <span class="wb-arrow" id="weather-arrow">▼</span>
       </div>
     </div>
 
