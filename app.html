@@ -429,13 +429,15 @@
       animation:splashFadeIn .8s ease both;animation-delay:.2s; }
     .splash-sub { font-size:15px;color:rgba(255,255,255,0.88);letter-spacing:3px;font-weight:400;
       position:relative;z-index:1;animation:splashFadeIn .8s ease both;animation-delay:.5s; }
-    /* 天气芯片 */
-    .weather-chip { display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:16px;
-      background:rgba(255,255,255,0.18);color:#fff;font-size:12px;cursor:pointer;transition:background .15s;white-space:nowrap; }
-    .weather-chip:hover { background:rgba(255,255,255,0.28); }
-    .weather-chip span { line-height:1; }
-    #weather-temp { font-size:11.5px;font-weight:500; }
-    #weather-tier { font-size:11px; }
+    /* 天气信息条 */
+    .weather-bar { display:flex;align-items:center;gap:6px;padding:8px 14px;margin:6px 12px 2px;
+      background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);
+      font-size:13px;color:#1A2E24;cursor:pointer;transition:background .15s; }
+    .weather-bar:hover { background:#F8FBF9; }
+    .wb-icon { font-size:15px; }
+    .wb-temp { font-weight:600;color:#5B8A6E; }
+    .wb-tier { color:#8BA89D;font-size:12px; }
+    .wb-arrow { margin-left:auto;color:#8BA89D;font-size:11px; }
 
     /* 穿衣建议面板 */
     .weather-panel { margin:0 12px 10px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04); }
@@ -472,18 +474,20 @@
           </div>
         </div>
         <div class="city-chip" id="location-status" onclick="locateUser()" style="cursor:pointer" title="点击重新定位">📍 定位中...</div>
-        <div class="weather-chip" id="weather-chip" onclick="toggleWeatherPanel()" title="今日穿衣建议" style="display:none">
-          <span id="weather-icon">☀️</span>
-          <span id="weather-temp"></span>
-          <span id="weather-tier" style="opacity:.85"></span>
-          <span id="weather-arrow">▼</span>
-        </div>
         <div class="map-btn" id="map-btn" onclick="openMapLayer()" title="查看地图"><svg viewBox="0 0 36 36" width="28" height="28" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="36" height="36" rx="7" fill="#FFF3E0"/><path d="M4 2 L32 6 L30 30 L2 26Z" fill="#fff" stroke="#E0E0E0" stroke-width="1.2"/><path d="M12 3 L11 29" stroke="#EEE" stroke-width="1.3"/><path d="M22 4 L21 29.5" stroke="#EEE" stroke-width="1.3"/><ellipse cx="9" cy="11" rx="5" ry="3.5" fill="#C8E6C9" opacity=".65"/><ellipse cx="27" cy="24" rx="6" ry="4" fill="#A5D6A7" opacity=".55"/><path d="M6 17 Q13 13 18 16 T28 14" fill="none" stroke="#81D4FA" stroke-width="3" stroke-linecap="round" opacity=".55"/><g transform="translate(18,14)"><circle cx="0" cy="-1" r="9" fill="#FF5722" opacity=".15"/><path d="M0 -13 C-8 -13 -14 -7 -14 -1 C-14 7 0 20 0 20 C0 20 14 7 14 -1 C14 -7 8 -13 0 -13Z" fill="#FF5722"/><path d="M0 -10 C-6 -10 -11 -5 -11 -1 C-11 6 0 16 0 16 C0 16 11 6 11 -1 C11 -5 6 -10 0 -10Z" fill="#FF7043"/><circle cx="0" cy="0" r="3.5" fill="#fff"/></g></svg></div>
       </div>
       <div class="search-bar">
         <span style="font-size:15px;color:var(--tx-muted)">🔍</span>
         <input type="text" placeholder="搜索公园、设施..." id="search-input" />
         <div class="dice-btn" id="dice-btn" onclick="rollDice()">🎲</div>
+      </div>
+
+      <!-- 天气信息条 -->
+      <div class="weather-bar" id="weather-bar" onclick="toggleWeatherPanel()" style="display:none">
+        <span class="wb-icon" id="weather-icon">☀️</span>
+        <span class="wb-temp" id="weather-temp"></span>
+        <span class="wb-tier" id="weather-tier"></span>
+        <span class="wb-arrow" id="weather-arrow">▼</span>
       </div>
 
       <!-- 分类筛选栏（已隐藏） -->
@@ -3338,8 +3342,8 @@ function locateUser() {
   /* 共用：天气回调 —— 更新天气芯片 + 穿衣建议面板 */
   function _onWeather(data) {
     if (!data) return;
-    var chip = document.getElementById('weather-chip');
-    if (chip) chip.style.display = 'flex';
+    var bar = document.getElementById('weather-bar');
+    if (bar) bar.style.display = 'flex';
     var iconEl = document.getElementById('weather-icon');
     if (iconEl) iconEl.textContent = data.icon;
     var tempEl = document.getElementById('weather-temp');
