@@ -117,10 +117,9 @@
       display:flex;align-items:center;justify-content:center;
       border:1.5px solid var(--bd);flex-shrink:0;box-shadow:var(--sh-sm); }
     .logo-icon img { width:100%;height:100%;object-fit:cover; }
-    .logo-text-wrap { display:flex;align-items:baseline;gap:8px;min-width:0; }
-    .logo-text { font-size:20px;font-weight:800;color:var(--fog-dark);letter-spacing:.5px;line-height:1.2;flex-shrink:0; }
-    .logo-sub { font-size:11px;color:var(--tx-muted);letter-spacing:.4px;line-height:1.2;
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .logo-text-wrap { display:flex;flex-direction:column;align-items:flex-start;gap:1px;flex-shrink:0; }
+    .logo-text { font-size:19px;font-weight:800;color:var(--fog-dark);letter-spacing:.5px;line-height:1.2;flex-shrink:0; }
+    .logo-sub { font-size:11px;color:var(--tx-muted);letter-spacing:.3px;line-height:1.2;white-space:nowrap; }
     .city-chip { display:flex;align-items:center;gap:4px;padding:5px 11px;
       background:var(--tag-mint);border-radius:999px;font-size:12px;font-weight:600;
       color:var(--fog-dark);cursor:pointer;
@@ -3433,9 +3432,9 @@ function locateUser() {
     var chip = document.getElementById('weather-chip');
     if (chip) chip.style.display = 'flex';
     var panel = document.getElementById('weather-panel');
-    if (panel) { panel.style.display = 'block'; _weatherOpen = true; }
+    if (panel) { panel.style.display = 'none'; _weatherOpen = false; }
     var arrowEl = document.getElementById('weather-arrow');
-    if (arrowEl) arrowEl.textContent = '▴';
+    if (arrowEl) arrowEl.textContent = '▾';
     var iconEl = document.getElementById('weather-icon');
     if (iconEl) iconEl.textContent = data.icon;
     var tempEl = document.getElementById('weather-temp');
@@ -3469,12 +3468,12 @@ function locateUser() {
         remEl.style.display = 'none';
       }
     }
-    /* 穿衣助手默认展开 */
-    _weatherOpen = true;
+    /* 穿衣助手默认收起，点天气胶囊展开 */
+    _weatherOpen = false;
     var panel2 = document.getElementById('weather-panel');
-    if (panel2) panel2.style.display = 'block';
+    if (panel2) panel2.style.display = 'none';
     var arrow2 = document.getElementById('weather-arrow');
-    if (arrow2) arrow2.textContent = '▴';
+    if (arrow2) arrow2.textContent = '▾';
   }
 
   function tryLocate() {
@@ -3522,7 +3521,7 @@ function locateUser() {
     userLocation = { lat: _bestPos.lat, lng: _bestPos.lng };
     locationFailed = false;
     var accText = _bestPos.accuracy < 50 ? '✅' : (_bestPos.accuracy < 200 ? '⚠️' : '📍');
-    locEl.innerHTML = accText + ' 已定位(±' + Math.round(_bestPos.accuracy) + 'm)';
+    locEl.innerHTML = accText + ' 已定位';
     renderHomeList(getFilteredPlaces());
     setTimeout(preloadMap, 1500);
 
@@ -4358,6 +4357,7 @@ function openWithFallback(schemeUrl, fallbackUrl) {
 
 /* ========== 地图浮层（Leaflet 交互式地图）========== */
 var _mapInstance = null;
+var _mapFitBounds = null;
 var _mapReady = false;      /* 地图是否已初始化完毕 */
 var _mapPendingOpen = false; /* 地图就绪前用户点了按钮 */
 
@@ -4446,6 +4446,7 @@ function _initMap() {
       [userLocation.lat - latDeg, userLocation.lng - lngDeg],
       [userLocation.lat + latDeg, userLocation.lng + lngDeg]
     ];
+    _mapFitBounds = bnds;
     _mapInstance.fitBounds(bnds);
   } catch(e){}
 
@@ -4560,10 +4561,21 @@ function openMapLayer() {
     _mapReady = true;
     _mapPendingOpen = true;
     _initMap();
-  } else if (_mapInstance) {
-    /* 已有实例，修正尺寸即可（因之前是隐藏状态） */
-    setTimeout(function(){ _mapInstance.invalidateSize(); }, 80);
   }
+  /* 浮层显示后多次修正尺寸，确保瓦片立即加载、视图正确 */
+  _refreshMapView();
+}
+
+function _refreshMapView() {
+  if (!_mapInstance) { setTimeout(_refreshMapView, 120); return; }
+  var fix = function(refit){
+    if (!_mapInstance) return;
+    _mapInstance.invalidateSize(true);
+    if (refit && _mapFitBounds) { try { _mapInstance.fitBounds(_mapFitBounds); } catch(e){} }
+  };
+  if (window.requestAnimationFrame) requestAnimationFrame(function(){ fix(false); });
+  setTimeout(function(){ fix(false); }, 120);
+  setTimeout(function(){ fix(true); }, 360);
 }
 
 function closeMapLayer() {
