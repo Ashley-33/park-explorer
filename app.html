@@ -346,8 +346,8 @@
     .load-more-sentinel.done { color:var(--fog-light);font-weight:500; }
 
     /* ========== 详情页 ========== */
-    .detail-header { background:var(--fog-green);
-      padding: 10px 20px 16px;}
+    .detail-header { background:linear-gradient(155deg, #45BD84 0%, #277A52 100%);
+      padding: calc(env(safe-area-inset-top,18px) + 8px) 20px 18px;}
     .back-btn { display:flex;align-items:center;gap:6px;font-size:14.5px;font-weight:600;color:#FFF;cursor:pointer;width:fit-content; }
     .detail-nav-row { display:flex;align-items:center;justify-content:space-between;margin-bottom:10px; }
     .detail-edit-btn { display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;color:#FFF;
@@ -364,11 +364,22 @@
       box-shadow:var(--sh-md);border:1px solid var(--bd); }
     .section-title { font-size:15px;font-weight:650;color:var(--tx-primary);margin-bottom:11px;letter-spacing:-0.15px; }
     .stars { color:#C4A86A;font-size:12.5px;letter-spacing:1px; }
-    .facilities-grid { display:flex;flex-wrap:wrap;gap:7px; }
-    .facility-tag { display:flex;align-items:center;gap:5px;padding:6px 13px;border-radius:16px;
-      font-size:12.5px;font-weight:500;border:1px solid var(--bd);color:var(--tx-secondary);background:var(--mist);
+    .facilities-grid { display:flex;flex-wrap:wrap;gap:8px; }
+    .facility-tag { display:flex;align-items:center;gap:5px;padding:6px 13px;border-radius:999px;
+      font-size:12.5px;font-weight:600;border:none;color:var(--tx-secondary);background:var(--mist-deep);
       transition:transform .12s ease; }
     .facility-tag:active { transform:scale(.95); }
+    .facility-tag.fac-sand { background:var(--tag-cream);color:#C77E1E; }
+    .facility-tag.fac-play { background:var(--tag-peach);color:var(--orange); }
+    .facility-tag.fac-water { background:var(--tag-blue);color:#2C82C9; }
+    .facility-tag.fac-lawn { background:var(--tag-mint);color:var(--fog-dark); }
+    .facility-tag.fac-bike { background:var(--tag-lav);color:var(--purple); }
+    .facility-tag.fac-indoor { background:var(--tag-lav);color:var(--purple); }
+    /* 避雷提示卡 */
+    .detail-warn-box { font-size:13px;color:var(--c-paid);background:var(--tag-cream);border-radius:12px;
+      padding:11px 13px;line-height:1.6;display:flex;align-items:flex-start;gap:7px; }
+    .detail-warn-box .dw-ico { flex-shrink:0; }
+    .section-sub { font-size:11.5px;font-weight:600;color:var(--tx-muted);margin:2px 0 7px; }
 
     /* 停车区块 */
     .parking-tabs { display:flex;gap:8px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none; }
@@ -380,13 +391,13 @@
     .parking-tab.active.tab-r{border-color:var(--c-park-r);background:rgba(91,122,138,0.08);color:var(--c-park-r); }
     .parking-tab.active.tab-n{border-color:var(--c-park-n);background:rgba(138,107,74,0.07);color:var(--c-park-n); }
     .parking-tab.active.tab-h{border-color:var(--c-park-h);background:rgba(107,91,138,0.07);color:var(--c-park-h); }
-    .parking-cards { display:flex;flex-direction:column;gap:8px; }
+    .parking-cards { display:flex;flex-direction:column;gap:10px; }
     .parking-card { border:1px solid var(--bd);border-radius:var(--r-sm);padding:13px;background:var(--mist);transition:border-color .15s ease; }
     .parking-card:hover { border-color:var(--bd-hover); }
     .parking-card-top { display:flex;align-items:center;gap:10px;margin-bottom:7px; }
-    .parking-card-name { font-size:14.5px;font-weight:550;color:var(--tx-primary);flex:1; }
-    .parking-tip { background:rgba(154,120,64,0.06);border:1px solid rgba(154,120,64,0.15);border-radius:var(--r-xs);
-      padding:6px 10px;font-size:11.5px;color:var(--c-paid);display:flex;align-items:flex-start;gap:6px;line-height:1.5; }
+    .parking-card-name { font-size:14.5px;font-weight:650;color:var(--tx-primary);flex:1; }
+    .parking-tip { background:var(--tag-cream);border:none;border-radius:10px;
+      padding:8px 11px;font-size:12px;color:var(--c-paid);display:flex;align-items:flex-start;gap:6px;line-height:1.55; }
 
     /* 管理入口按钮 */
     .admin-btn { display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:var(--r-xs);
@@ -607,12 +618,16 @@
     </div>
     <div class="scrollable">
       <div class="detail-body">
+        <div class="detail-section" id="detail-warn-section" style="display:none">
+          <div class="section-title">⚠️ 避雷提示</div>
+          <div class="detail-warn-box" id="detail-warn"></div>
+        </div>
         <div class="detail-section">
-          <div class="section-title">设施配置</div>
+          <div class="section-title">🏷️ 场地信息</div>
           <div class="facilities-grid" id="detail-facilities"></div>
         </div>
         <div class="detail-section" id="detail-parking-section">
-          <div class="section-title">停车方案</div>
+          <div class="section-title">🅿️ 停车方案</div>
           <div class="parking-cards" id="parking-cards"></div>
         </div>
       </div>
@@ -3771,29 +3786,44 @@ function renderDetail(p) {
     + (p.size ? '<span style="color:rgba(255,255,255,0.78);font-size:12.5px;display:block;margin-top:3px">📐 '+p.size+'</span>' : '');
   document.getElementById("detail-address").innerHTML = "<span>📍</span><span style='flex:1'>"+p.address+"</span><span class='nav-hint'>导航 🚗</span>";
   document.getElementById("detail-address").onclick = function() { openNavigation(p); };
-  /* 先清除上一次的 note 元素（如果有） */
+
+  /* 拆分简介 / 避雷 */
+  var dNote = p.note || '';
+  var dDesc = dNote, dWarn = '';
+  var dm = dNote.split(/避雷[:：]?/);
+  if (dm.length > 1) {
+    dDesc = dm[0].replace(/[\s·。，,]+$/,'');
+    dWarn = dm.slice(1).join('避雷').trim().split('【')[0].trim();
+  }
+
+  /* 头部简介框（只放简介，不含避雷） */
   var oldNote = document.getElementById("detail-note");
   if (oldNote) oldNote.remove();
-  if (p.note) {
+  if (dDesc) {
     var noteEl = document.createElement("div");
     noteEl.id = "detail-note";
-    noteEl.style.cssText = "font-size:12.5px;color:rgba(255,255,255,0.85);margin-top:4px;display:flex;align-items:flex-start;gap:4px;line-height:1.45;padding:6px 10px;background:rgba(255,255,255,0.1);border-radius:8px;";
-    noteEl.innerHTML = "<span>💬</span><span>"+p.note+"</span>";
+    noteEl.style.cssText = "font-size:12.5px;color:rgba(255,255,255,0.92);margin-top:8px;display:flex;align-items:flex-start;gap:5px;line-height:1.55;padding:9px 11px;background:rgba(255,255,255,0.14);border-radius:11px;";
+    noteEl.innerHTML = "<span>💬</span><span>"+dDesc+"</span>";
     document.getElementById("detail-address").insertAdjacentElement("afterend", noteEl);
   }
 
-  // 设施
+  /* 避雷提示卡 */
+  var warnSec = document.getElementById("detail-warn-section");
+  if (dWarn) {
+    document.getElementById("detail-warn").innerHTML = '<span class="dw-ico">🛡️</span><span>'+dWarn+'</span>';
+    warnSec.style.display = 'block';
+  } else {
+    warnSec.style.display = 'none';
+  }
+
+  // 设施（马卡龙标签）
+  var facClassMap = {'沙坑':'fac-sand','无动力':'fac-play','戏水区':'fac-water','大草坪':'fac-lawn','骑行道':'fac-bike','室内':'fac-indoor','露营':'fac-lawn'};
   var fhtml = "";
   for (var i = 0; i < p.facilities.length; i++) {
     if (VALID_FACILITIES.indexOf(p.facilities[i]) !== -1) {
-      var tagStyle = '';
       var facName = p.facilities[i];
-      if (facName === '沙坑') tagStyle = 'color:#B8860B;border:1.5px solid rgba(232,168,82,0.45)';
-      else if (facName === '无动力') tagStyle = 'color:#C2185B;border:1.5px solid rgba(224,102,145,0.45)';
-      else if (facName === '戏水区') tagStyle = 'color:#1976D2;border:1.5px solid rgba(66,165,245,0.45)';
-      else if (facName === '大草坪') tagStyle = 'color:#388E3C;border:1.5px solid rgba(102,187,106,0.45)';
-      else if (facName === '骑行道') tagStyle = 'color:#8E24AA;border:1.5px solid rgba(171,71,188,0.45)';
-      fhtml += '<div class="facility-tag" style="'+tagStyle+'">'+emoji(facName)+" "+displayName(facName)+"</div>";
+      var fc = facClassMap[facName] || '';
+      fhtml += '<div class="facility-tag '+fc+'">'+emoji(facName)+" "+displayName(facName)+"</div>";
     }
   }
   document.getElementById("detail-facilities").innerHTML = fhtml;
