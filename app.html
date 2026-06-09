@@ -770,9 +770,22 @@ function buildSuggestion(hiTemp, loTemp, weather) {
 var _weatherOpen = false;
 
 function toggleWeatherPanel() {
-  _weatherOpen = !_weatherOpen;
   var panel = document.getElementById('weather-panel');
-  if (panel) panel.style.display = _weatherOpen ? 'block' : 'none';
+  var sc = document.querySelector('#page-home .scrollable');
+  var inView = sc && sc.scrollTop < 40; /* 穿衣卡在列表顶部，是否已在视野内 */
+  if (_weatherOpen && inView) {
+    /* 已展开且看得见 → 收起 */
+    _weatherOpen = false;
+    if (panel) panel.style.display = 'none';
+  } else {
+    /* 展开并滚动到顶部，确保穿衣卡可见 */
+    _weatherOpen = true;
+    if (panel) panel.style.display = 'block';
+    if (sc) {
+      sc.scrollTop = 0;
+      try { sc.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
+    }
+  }
   var arrow = document.getElementById('weather-arrow');
   if (arrow) arrow.textContent = _weatherOpen ? '▴' : '▾';
 }
