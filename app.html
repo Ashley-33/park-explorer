@@ -224,11 +224,19 @@
     .retry-hint { font-size:12px;color:var(--tx-faint);margin-top:8px; }
 
     /* 地图按钮 */
-    .map-btn { font-size:22px;cursor:pointer;padding:6px 10px;border-radius:var(--r-sm);
+    .map-btn, .share-btn { font-size:22px;cursor:pointer;padding:6px 7px;border-radius:var(--r-sm);
       background:transparent;transition:all .15s ease;-webkit-tap-highlight-color:transparent;
-      user-select:none;line-height:1.5;border:none; }
-    .map-btn:active { transform:scale(0.92);opacity:.75; }
+      user-select:none;line-height:1.5;border:none;flex-shrink:0; }
+    .map-btn:active, .share-btn:active { transform:scale(0.92);opacity:.75; }
     .map-ping-icon { background:none;border:none;box-shadow:none; }
+    .header-actions { display:flex;align-items:center;gap:2px;flex-shrink:0; }
+
+    /* 轻提示 toast */
+    .toast { position:fixed;left:50%;bottom:64px;transform:translateX(-50%) translateY(12px);
+      background:rgba(26,46,36,0.92);color:#fff;font-size:13px;padding:9px 16px;border-radius:20px;
+      box-shadow:0 6px 20px rgba(26,46,36,0.25);z-index:9999;opacity:0;pointer-events:none;
+      transition:opacity .22s ease, transform .22s ease;max-width:80%;text-align:center; }
+    .toast.show { opacity:1;transform:translateX(-50%) translateY(0); }
 
     /* 地图浮层 */
     .map-overlay { display:none;position:fixed;top:0;left:0;right:0;bottom:0;
@@ -476,7 +484,10 @@
           </div>
         </div>
         <div class="city-chip" id="location-status" onclick="locateUser()" style="cursor:pointer" title="点击重新定位">📍 定位中...</div>
+        <div class="header-actions">
+        <div class="share-btn" id="share-btn" onclick="shareApp()" title="分享给朋友"><svg viewBox="0 0 36 36" width="28" height="28" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="36" height="36" rx="7" fill="#E8F2EB"/><path d="M11 16.5 v8 a2 2 0 0 0 2 2 h10 a2 2 0 0 0 2-2 v-8" fill="none" stroke="#3D6B52" stroke-width="2.3" stroke-linecap="round"/><path d="M18 8.5 v12.5" fill="none" stroke="#3D6B52" stroke-width="2.3" stroke-linecap="round"/><path d="M13.4 13 L18 8.4 L22.6 13" fill="none" stroke="#3D6B52" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="map-btn" id="map-btn" onclick="openMapLayer()" title="查看地图"><svg viewBox="0 0 36 36" width="28" height="28" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="36" height="36" rx="7" fill="#FFF3E0"/><path d="M4 2 L32 6 L30 30 L2 26Z" fill="#fff" stroke="#E0E0E0" stroke-width="1.2"/><path d="M12 3 L11 29" stroke="#EEE" stroke-width="1.3"/><path d="M22 4 L21 29.5" stroke="#EEE" stroke-width="1.3"/><ellipse cx="9" cy="11" rx="5" ry="3.5" fill="#C8E6C9" opacity=".65"/><ellipse cx="27" cy="24" rx="6" ry="4" fill="#A5D6A7" opacity=".55"/><path d="M6 17 Q13 13 18 16 T28 14" fill="none" stroke="#81D4FA" stroke-width="3" stroke-linecap="round" opacity=".55"/><g transform="translate(18,14)"><circle cx="0" cy="-1" r="9" fill="#FF5722" opacity=".15"/><path d="M0 -13 C-8 -13 -14 -7 -14 -1 C-14 7 0 20 0 20 C0 20 14 7 14 -1 C14 -7 8 -13 0 -13Z" fill="#FF5722"/><path d="M0 -10 C-6 -10 -11 -5 -11 -1 C-11 6 0 16 0 16 C0 16 11 6 11 -1 C11 -5 6 -10 0 -10Z" fill="#FF7043"/><circle cx="0" cy="0" r="3.5" fill="#fff"/></g></svg></div>
+        </div>
       </div>
       <div class="search-bar">
         <span style="font-size:15px;color:var(--tx-muted)">🔍</span>
@@ -4373,6 +4384,62 @@ function _initMap() {
     _mapPendingOpen = false;
     setTimeout(function(){ _mapInstance.invalidateSize(); }, 100);
   }
+}
+
+/* 轻提示 */
+var _toastTimer = null;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast'; t.className = 'toast';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  /* 强制重绘后加 show，确保过渡动画生效 */
+  void t.offsetWidth;
+  t.classList.add('show');
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+
+/* 分享当前网址：优先系统分享，回退复制链接 */
+function shareApp() {
+  var url = location.origin + location.pathname;
+  var shareData = {
+    title: '遛呗 · 北京',
+    text: '遛呗 · 北京遛娃地图，发现身边适合遛娃的公园～',
+    url: url
+  };
+  if (navigator.share) {
+    navigator.share(shareData).catch(function(err){
+      /* 用户取消分享不算错误，无需提示 */
+      if (err && err.name !== 'AbortError') copyLink(url);
+    });
+  } else {
+    copyLink(url);
+  }
+}
+
+function copyLink(url) {
+  function done(){ showToast('链接已复制，去粘贴给朋友吧 🎉'); }
+  function fail(){ showToast(url); }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(done).catch(function(){ legacyCopy(url, done, fail); });
+  } else {
+    legacyCopy(url, done, fail);
+  }
+}
+
+function legacyCopy(text, done, fail) {
+  try {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    var ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    ok ? done() : fail();
+  } catch (e) { fail(); }
 }
 
 function openMapLayer() {
