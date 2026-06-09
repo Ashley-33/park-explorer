@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#5B8A6E" />
+  <meta name="theme-color" content="#2FA06A" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
@@ -30,42 +30,55 @@
   <script src="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <style>
     :root {
-      /* === 雾绿色系 · 低饱和 · 自然感 === */
-      --mist:          #F7FAF8;
-      --mist-deep:     #EEF3F0;
+      /* === 清新薄荷绿系 · 明亮 · 友好（UI 改版）=== */
+      --mist:          #F2FBF6;
+      --mist-deep:     #E8F5EE;
       --mist-card:     #FFFFFF;
-      --fog-green:     #5B8A6E;
-      --fog-light:     #7AA88E;
-      --fog-dark:      #3D6B52;
-      --fog-subtle:    #E8EEEA;
+      --fog-green:     #2FA06A;
+      --fog-light:     #57B98A;
+      --fog-dark:      #277A52;
+      --fog-subtle:    #E7F8EF;
 
       /* 文字 */
-      --tx-primary:    #1A2E24;
-      --tx-secondary:  #4A6B5C;
-      --tx-muted:      #8BA89D;
-      --tx-faint:      #B0CCC0;
+      --tx-primary:    #1C2F26;
+      --tx-secondary:  #466357;
+      --tx-muted:      #8AA096;
+      --tx-faint:      #AEC6BB;
 
       /* 边框与阴影 */
-      --bd:            rgba(91,138,110,0.13);
-      --bd-hover:      rgba(91,138,110,0.25);
-      --sh-sm:         0 1px 4px rgba(26,46,36,0.04);
-      --sh-md:         0 2px 12px rgba(26,46,36,0.06);
-      --sh-lg:         0 8px 30px rgba(26,46,36,0.08);
+      --bd:            rgba(47,160,106,0.13);
+      --bd-hover:      rgba(47,160,106,0.28);
+      --sh-sm:         0 1px 4px rgba(28,47,38,0.05);
+      --sh-md:         0 3px 14px rgba(28,47,38,0.07);
+      --sh-lg:         0 10px 30px rgba(28,47,38,0.10);
 
       /* 圆角 */
-      --r-xs:          8px;
+      --r-xs:          9px;
       --r-sm:          12px;
       --r-md:          16px;
       --r-lg:          20px;
       --r-xl:          24px;
 
       /* 功能色 */
-      --c-free:        #4A7C5F;
-      --c-paid:        #9A7840;
-      --c-park-p:      #5B8A6E;
+      --c-free:        #2FA06A;
+      --c-paid:        #C77E1E;
+      --c-park-p:      #2FA06A;
       --c-park-r:      #5B7A8A;
       --c-park-n:      #8A6B4A;
       --c-park-h:      #6B5B8A;
+
+      /* 强调色 */
+      --gold:          #E9A615;
+      --purple:        #7C5CD6;
+      --orange:        #E2613F;
+
+      /* 马卡龙标签底色 */
+      --tag-mint:      #E7F8EF;
+      --tag-cream:     #FFF5DB;
+      --tag-lav:       #EFEAFC;
+      --tag-tan:       #FDF3E3;
+      --tag-peach:     #FFE6DC;
+      --tag-blue:      #E3F2FB;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body {
@@ -95,36 +108,47 @@
     .badge-p{background:var(--c-park-p)} .badge-r{background:var(--c-park-r)}
     .badge-n{background:var(--c-park-n)} .badge-h{background:var(--c-park-h)}
 
-    /* ========== 首页 Header（雾绿纯色） ========== */
-    .home-header { background:var(--fog-green);
-      padding:calc(env(safe-area-inset-top,18px)+10px) 20px 16px; }
-    .header-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; margin-top: 10px; padding: 0 16px;}
-    .logo { display:flex; align-items:center; gap:12px; }
-    .logo-icon { width:38px;height:38px;border-radius:50%;overflow:hidden;
+    /* ========== 首页 Header（清新浅色） ========== */
+    .home-header { background:var(--mist);
+      padding:calc(env(safe-area-inset-top,18px)+8px) 4px 8px; }
+    .header-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; margin-top: 8px; padding: 0 16px;}
+    .logo { display:flex; align-items:center; gap:11px; min-width:0; }
+    .logo-icon { width:38px;height:38px;border-radius:11px;overflow:hidden;
       display:flex;align-items:center;justify-content:center;
-      border:1.5px solid rgba(255,255,255,0.25);flex-shrink:0; }
-    .logo-icon img { width:100%;height:100%;object-fit:cover;border-radius:50%; }
-    .logo-text-wrap { display:flex;flex-direction:column;align-items:flex-start;gap:2px; }
-    .logo-text { font-size:18px;font-weight:700;color:#FFF;letter-spacing:1px;line-height:1.2; }
-    .logo-sub { font-size:11px;color:rgba(255,255,255,0.7);letter-spacing:.8px;line-height:1.2; }
-    .city-chip { display:flex;align-items:center;gap:5px;padding:5px 12px;
-      background:rgba(255,255,255,0.15);border-radius:20px;font-size:12px;font-weight:500;
-      color:rgba(255,255,255,0.9);cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-      border:1px solid rgba(255,255,255,0.12);transition:background .2s; }
-    .city-chip:active { background:rgba(255,255,255,0.25); }
+      border:1.5px solid var(--bd);flex-shrink:0;box-shadow:var(--sh-sm); }
+    .logo-icon img { width:100%;height:100%;object-fit:cover; }
+    .logo-text-wrap { display:flex;align-items:baseline;gap:8px;min-width:0; }
+    .logo-text { font-size:20px;font-weight:800;color:var(--fog-dark);letter-spacing:.5px;line-height:1.2;flex-shrink:0; }
+    .logo-sub { font-size:11px;color:var(--tx-muted);letter-spacing:.4px;line-height:1.2;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .city-chip { display:flex;align-items:center;gap:4px;padding:5px 11px;
+      background:var(--tag-mint);border-radius:999px;font-size:12px;font-weight:600;
+      color:var(--fog-dark);cursor:pointer;
+      border:1px solid var(--bd);transition:background .2s; }
+    .city-chip:active { background:var(--fog-subtle); }
 
     /* 搜索栏 */
     .search-bar { display:flex;align-items:center;gap:8px;
-      background:rgba(255,255,255,0.92);border:none;border-radius:var(--r-md);padding:9px 14px;
-      box-shadow:var(--sh-sm);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px); margin: 0 16px 10px 16px; }
-    .search-bar input { flex:1;border:none;background:transparent;font-size:14px;color:var(--tx-primary);outline:none;letter-spacing:-0.1px; }
+      background:var(--mist-card);border:1px solid var(--bd);border-radius:var(--r-md);padding:8px 10px 8px 14px;
+      box-shadow:var(--sh-sm); margin: 0 16px 12px 16px; }
+    .search-bar .sb-ico { font-size:15px;color:var(--tx-muted);flex-shrink:0; }
+    .search-bar input { flex:1;min-width:0;border:none;background:transparent;font-size:14px;color:var(--tx-primary);outline:none;letter-spacing:-0.1px; }
     .search-bar input::placeholder { color:var(--tx-muted); }
 
-    /* 骰子 */
-    .dice-btn { font-size:18px;cursor:pointer;flex-shrink:0;
+    /* 搜索栏内 · 天气小胶囊 */
+    .weather-chip { display:flex;align-items:center;gap:3px;flex-shrink:0;cursor:pointer;
+      background:var(--tag-cream);color:var(--c-paid);font-size:12px;font-weight:700;
+      padding:5px 9px;border-radius:999px;line-height:1;-webkit-tap-highlight-color:transparent;
+      transition:transform .12s ease; }
+    .weather-chip:active { transform:scale(.94); }
+    .weather-chip .wc-arrow { font-size:9px;opacity:.7;margin-left:1px; }
+
+    /* 骰子（橙色方钮） */
+    .dice-btn { font-size:17px;cursor:pointer;flex-shrink:0;width:34px;height:34px;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;background:var(--orange);
       transition:transform .5s cubic-bezier(.4,0,.2,1);user-select:none;-webkit-tap-highlight-color:transparent;
-      opacity:.75; animation:dice-idle 2.8s ease-in-out infinite; }
-    .dice-btn:active { opacity:1; transform:scale(0.88); }
+      animation:dice-idle 2.8s ease-in-out infinite; }
+    .dice-btn:active { transform:scale(0.88); }
     .dice-btn.rolling { animation:dice-roll .7s ease-out; }
     @keyframes dice-idle { 0%,100%{transform:rotate(0deg)} 25%{transform:rotate(-10deg)} 75%{transform:rotate(10deg)} }
     @keyframes dice-roll {
@@ -157,63 +181,71 @@
     .dice-close-hint { font-size:11px;color:var(--tx-faint);margin-top:12px; }
     @keyframes bounce-in { 0%{transform:scale(0) rotate(-15deg);opacity:0} 60%{transform:scale(1.25) rotate(5deg);opacity:1} 100%{transform:scale(1) rotate(0);opacity:1} }
 
-    /* 筛选栏（独立白底，轻量） */
-    .filter-bar { background:var(--mist-card);padding:10px 16px 12px;
-      overflow-x:auto;display:flex;gap:7px;-webkit-overflow-scrolling:touch;scrollbar-width:none;
-      border-bottom:1px solid var(--bd); }
+    /* 筛选栏（透明底，胶囊 chip） */
+    .filter-bar { background:transparent;padding:2px 16px 10px;
+      overflow-x:auto;display:flex;gap:8px;-webkit-overflow-scrolling:touch;scrollbar-width:none; }
     .filter-bar::-webkit-scrollbar { display:none; }
     .filter-bar::after { content:"";padding-right:8px;flex-shrink:0; }
-    .filter-tag { flex-shrink:0;padding:5px 13px;border-radius:18px;font-size:12.5px;font-weight:500;cursor:pointer;
-      border:1px solid var(--bd);background:var(--mist-card);color:var(--tx-muted);transition:all .2s ease;user-select:none;letter-spacing:.2px; }
-    .filter-tag.active { background:var(--fog-green);border-color:var(--fog-green);color:#FFF;box-shadow:var(--sh-sm); }
-    .cat-tag { flex-shrink:0;padding:5px 12px;border-radius:18px;font-size:12.5px;font-weight:500;cursor:pointer;
-      border:1px solid var(--bd);background:var(--mist-card);color:var(--tx-muted);transition:all .2s ease;user-select:none; }
+    .filter-tag { flex-shrink:0;padding:6px 14px;border-radius:999px;font-size:12.5px;font-weight:600;cursor:pointer;
+      border:1px solid var(--bd);background:var(--mist-card);color:var(--tx-secondary);transition:all .2s ease;user-select:none;letter-spacing:.2px;box-shadow:var(--sh-sm); }
+    .filter-tag.active { background:var(--fog-green);border-color:var(--fog-green);color:#FFF;box-shadow:0 2px 8px rgba(47,160,106,0.3); }
+    .cat-tag { flex-shrink:0;padding:6px 14px;border-radius:999px;font-size:12.5px;font-weight:600;cursor:pointer;
+      border:1px solid var(--bd);background:var(--mist-card);color:var(--tx-secondary);transition:all .2s ease;user-select:none; }
     .cat-tag.active { background:var(--fog-green);border-color:var(--fog-green);color:#FFF;box-shadow:var(--sh-sm); }
 
-    /* ========== 卡片 · Apple Maps 风格 ========== */
-    .places-list { padding:16px 16px 16px;display:flex;flex-direction:column;gap:10px; }
-    .place-card { background:var(--mist-card);border-radius:var(--r-md);padding:15px 16px;
+    /* ========== 卡片 · 清新改版 ========== */
+    .places-list { padding:14px 16px 16px;display:flex;flex-direction:column;gap:12px; }
+    .place-card { background:var(--mist-card);border-radius:var(--r-md);padding:14px 15px;
       box-shadow:var(--sh-md);cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
       border:1px solid var(--bd);position:relative; }
     .place-card:active { transform:scale(.985);box-shadow:var(--sh-lg);border-color:var(--bd-hover); }
-    .place-card-top { display:flex;justify-content:space-between;align-items:center;margin-bottom:6px; }
-    .place-name-row { display:flex;align-items:center;gap:9px;flex:1;min-width:0; }
-    .place-name { font-size:15.5px;font-weight:650;color:var(--tx-primary);letter-spacing:-0.15px;line-height:1.3; }
-    .place-cost { font-size:11.5px;white-space:nowrap;font-weight:600;flex-shrink:0;
-      padding:3px 9px;border-radius:var(--r-xs);border:1px solid var(--bd); }
-    .place-address-row { font-size:12px;color:var(--tx-muted);margin-bottom:7px;
-      display:flex;align-items:center;gap:5px;line-height:1.4; }
-    .place-note { font-size:12px;color:var(--tx-secondary);margin-bottom:9px;line-height:1.55;
-      padding:8px 10px;background:var(--mist);border-radius:var(--r-xs);
-      box-sizing:border-box;display:-webkit-box;-webkit-box-orient:vertical;
-      -webkit-line-clamp:3;overflow:hidden;max-height:74px;}
-    .place-facilities { display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px; }
-    .place-size { font-size:11.5px;color:var(--tx-muted);line-height:1.4;margin-bottom:8px;padding-left:1px;font-weight:450; }
-    .place-cat-row { display:none; }
-    .cat-chip { font-size:11px;font-weight:600;padding:2px 9px;border-radius:10px;
-      background:#E8F5E9;color:#2E7D32;white-space:nowrap;letter-spacing:.3px; }
-    .cat-chip.cat-play { background:#FFF3E0;color:#E65100; }
-    .cat-chip.cat-nature { background:#E3F2FD;color:#1565C0; }
-    .cat-chip.cat-street { background:#F3E5F5;color:#7B1FA2; }
-    .cat-chip.cat-exhibit { background:#FFF8E1;color:#E65100; }
-    .scene-badge { font-size:10px;font-weight:600;padding:1px 7px;border-radius:8px;
-      background:#FFEBEE;color:#C62828;margin-left:auto; }
 
-    /* 设施标签（统一低饱和雾绿调，不再彩虹色） */
-    .facility-mini { font-size:11px;padding:3px 9px;border-radius:14px;font-weight:500;
-      border:1px solid var(--bd);color:var(--tx-secondary);background:var(--mist);transition:transform .12s ease; }
-    .facility-mini:hover { transform:scale(1.04); }
-    .fac-sand { background:#FFF8E1;border-color:rgba(255,183,77,0.5);color:#E65100; }
-    .fac-play { background:#FCE4EC;border-color:rgba(240,98,146,0.45);color:#C2185B; }
-    .fac-water { background:#E3F2FD;border-color:rgba(100,181,246,0.45);color:#1976D2; }
-    .fac-lawn { background:#E8F5E9;border-color:rgba(129,199,132,0.45);color:#388E3C; }
-    .fac-bike { background:#F3E5F5;border-color:rgba(186,104,200,0.45);color:#8E24AA; }
-    .fac-indoor { background:#E8EAF6;border-color:rgba(121,134,203,0.45);color:#3949AB; }
-    .place-footer { display:none; }
-      padding-top:9px;border-top:1px solid var(--bd);margin-top:1px; }
-    .parking-hint { display:flex;align-items:center;gap:5px;font-size:12px;color:var(--tx-secondary);font-weight:450; }
-    .parking-hint.free { color:var(--c-free);font-weight:600; }
-    .facility-count { font-size:11.5px;color:var(--tx-faint);font-weight:450;background:var(--mist);padding:3px 9px;border-radius:var(--r-xs); }
+    /* 标题行：图标徽章 + 标题 + 价格徽章 */
+    .pc-head { display:flex;align-items:flex-start;gap:10px;margin-bottom:8px; }
+    .pc-badge { width:34px;height:34px;border-radius:10px;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1; }
+    .pc-badge.b-park   { background:var(--tag-mint); }
+    .pc-badge.b-play   { background:var(--tag-tan); }
+    .pc-badge.b-nature { background:var(--tag-blue); }
+    .pc-badge.b-street { background:var(--tag-mint); }
+    .pc-badge.b-exhibit{ background:var(--tag-lav); }
+    .pc-title-wrap { flex:1;min-width:0;padding-top:1px; }
+    .pc-title { font-size:15.5px;font-weight:700;color:var(--tx-primary);letter-spacing:-0.2px;line-height:1.3;
+      display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden; }
+    .pc-cost { font-size:11.5px;font-weight:700;flex-shrink:0;
+      padding:4px 11px;border-radius:999px;line-height:1.3;text-align:center;max-width:118px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .pc-cost.free { color:var(--fog-dark);background:var(--tag-mint); }
+    .pc-cost.paid { color:var(--c-paid);background:var(--tag-cream); }
+
+    .pc-addr { font-size:12px;color:var(--tx-muted);margin-bottom:7px;
+      display:flex;align-items:center;gap:5px;line-height:1.4;flex-wrap:wrap; }
+    .pc-addr .pc-pin { color:var(--orange); }
+    .pc-addr .pc-dist { color:var(--fog-dark);font-weight:600; }
+    .pc-desc { font-size:12.5px;color:var(--tx-secondary);margin-bottom:9px;line-height:1.55;
+      display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden; }
+
+    /* 避雷提示行 */
+    .pc-warn { font-size:12px;color:var(--c-paid);
+      background:var(--tag-cream);border-radius:10px;padding:7px 11px;margin-bottom:10px;line-height:1.5;
+      display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden; }
+    .pc-warn b { font-weight:700;color:#B9821A; }
+
+    .pc-tags { display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px; }
+    .pc-size { font-size:11.5px;color:var(--tx-muted);line-height:1.4;font-weight:450;
+      display:flex;align-items:center;gap:4px; }
+    .pc-size b { color:var(--tx-secondary);font-weight:600; }
+
+    /* 设施标签（马卡龙浅色） */
+    .facility-mini { font-size:11px;padding:3px 10px;border-radius:999px;font-weight:600;
+      color:var(--tx-secondary);background:var(--mist-deep);border:none; }
+    .fac-sand { background:var(--tag-cream);color:#C77E1E; }
+    .fac-play { background:var(--tag-peach);color:var(--orange); }
+    .fac-water { background:var(--tag-blue);color:#2C82C9; }
+    .fac-lawn { background:var(--tag-mint);color:var(--fog-dark); }
+    .fac-bike { background:var(--tag-lav);color:var(--purple); }
+    .fac-indoor { background:var(--tag-lav);color:var(--purple); }
+    .place-cat-row, .place-footer { display:none; }
     .empty-state { text-align:center;padding:56px 20px;color:var(--tx-secondary); }
     .empty-state .emoji { font-size:44px;margin-bottom:12px;opacity:.6; }
     .empty-state p { font-size:15px;font-weight:500; }
@@ -439,27 +471,30 @@
       animation:splashFadeIn .8s ease both;animation-delay:.2s; }
     .splash-sub { font-size:15px;color:rgba(255,255,255,0.88);letter-spacing:3px;font-weight:400;
       position:relative;z-index:1;animation:splashFadeIn .8s ease both;animation-delay:.5s; }
-    /* 天气信息条 */
-    .weather-bar { display:flex;align-items:center;gap:5px;padding:3px 10px;margin:5px 16px 2px;
-      background:transparent;border-radius:8px;border:none;
-      font-size:11.5px;color:#8BA89D;cursor:pointer;transition:background .15s;opacity:.85; }
-    .weather-bar:hover { background:rgba(91,138,110,.06); }
-    .wb-icon { font-size:12px; }
-    .wb-temp { font-weight:600;color:#7AA88E; }
-    .wb-tier { color:#A8BFB4;font-size:11px; }
-    .wb-arrow { margin-left:auto;color:#B0CCC0;font-size:10px; }
-
-    /* 穿衣建议面板 */
-    .weather-panel { margin:0 12px 10px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04); }
-    .wp-header { display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer; }
-    .wp-title { font-size:13px;font-weight:600;color:#1A2E24; }
-    .wp-toggle { font-size:11px;color:#8BA89D; }
-    .wp-body { padding:0 14px 12px; }
-    .wp-row { display:flex;gap:6px;font-size:12px;padding:3px 0; }
-    .wp-label { color:#5B8A6E;flex-shrink:0; }
-    .wp-value { color:#1A2E24; }
-    .wp-reminders { margin-top:8px;padding:8px 10px;background:#FFF8E1;border-radius:8px; }
-    .wp-reminder { font-size:11.5px;color:#C0762E; }
+    /* 穿衣助手 · 内联卡片 */
+    .dress-card { margin:14px 16px 2px;background:var(--mist-card);border:1px solid var(--bd);
+      border-radius:var(--r-md);padding:13px 14px;box-shadow:var(--sh-md); }
+    .dress-head { display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--tx-primary);margin-bottom:11px; }
+    .dress-head .dh-ico { font-size:15px; }
+    .dress-head b { font-weight:700; }
+    .dress-tier { color:var(--fog-dark);font-size:12px;font-weight:600;
+      background:var(--tag-mint);padding:2px 9px;border-radius:999px;margin-left:auto; }
+    .dress-grid { display:flex;flex-wrap:wrap;gap:9px 8px; }
+    .dress-item { display:flex;align-items:center;gap:7px;flex:1 1 44%;min-width:0; }
+    .di-badge { width:28px;height:28px;border-radius:9px;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1; }
+    .dib-1 { background:var(--tag-mint); }
+    .dib-2 { background:var(--tag-blue); }
+    .dib-3 { background:var(--tag-cream); }
+    .dib-4 { background:var(--tag-peach); }
+    .dib-5 { background:var(--tag-lav); }
+    .di-tx { display:flex;flex-direction:column;min-width:0;line-height:1.25; }
+    .di-label { font-size:10.5px;color:var(--tx-muted);font-weight:600; }
+    .di-val { font-size:12.5px;color:var(--tx-primary);font-weight:500;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .dress-reminders:not(:empty) { margin-top:11px;padding:8px 11px;background:var(--tag-cream);border-radius:10px;
+      display:flex;flex-direction:column;gap:3px; }
+    .wp-reminder { font-size:11.5px;color:var(--c-paid);line-height:1.5; }
 
     @keyframes splashFadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
   </style>
@@ -490,8 +525,13 @@
         </div>
       </div>
       <div class="search-bar">
-        <span style="font-size:15px;color:var(--tx-muted)">🔍</span>
+        <span class="sb-ico">🔍</span>
         <input type="text" placeholder="搜索公园、设施..." id="search-input" />
+        <div class="weather-chip" id="weather-chip" onclick="toggleWeatherPanel()" style="display:none">
+          <span id="weather-icon">☀️</span>
+          <span id="weather-temp"></span>
+          <span class="wc-arrow" id="weather-arrow">▾</span>
+        </div>
         <div class="dice-btn" id="dice-btn" onclick="rollDice()">🎲</div>
       </div>
 
@@ -518,28 +558,20 @@
       </div>
     </div>
 
-    <!-- 天气信息条 -->
-    <div class="weather-bar" id="weather-bar" onclick="toggleWeatherPanel()" style="display:none">
-      <span class="wb-icon" id="weather-icon">☀️</span>
-      <span class="wb-temp" id="weather-temp"></span>
-      <span class="wb-tier" id="weather-tier"></span>
-      <span class="wb-arrow" id="weather-arrow">▼</span>
-    </div>
-
-    <!-- 穿衣建议详情面板 -->
-    <div class="weather-panel" id="weather-panel" style="display:none">
-      <div class="wp-body">
-        <div class="wp-row"><span class="wp-label">👕 里层</span><span class="wp-value" id="wp-layers">-</span></div>
-        <div class="wp-row"><span class="wp-label">🧥 外套</span><span class="wp-value" id="wp-outer">-</span></div>
-        <div class="wp-row"><span class="wp-label">👖 下装</span><span class="wp-value" id="wp-pants">-</span></div>
-        <div class="wp-row"><span class="wp-label">👟 鞋袜</span><span class="wp-value" id="wp-shoes">-</span></div>
-        <div class="wp-row"><span class="wp-label">🎩 配饰</span><span class="wp-value" id="wp-accessories">-</span></div>
-        <div class="wp-reminders" id="wp-reminders"></div>
-      </div>
-    </div>
-
     <!-- 地点列表 -->
     <div class="scrollable">
+      <!-- 穿衣助手（内联卡片，默认展开） -->
+      <div class="dress-card" id="weather-panel" style="display:none">
+        <div class="dress-head"><span class="dh-ico">👕</span><b>穿衣助手</b><span class="dress-tier" id="weather-tier"></span></div>
+        <div class="dress-grid">
+          <div class="dress-item"><span class="di-badge dib-1">👕</span><div class="di-tx"><span class="di-label">里层</span><span class="di-val" id="wp-layers">-</span></div></div>
+          <div class="dress-item"><span class="di-badge dib-2">🧥</span><div class="di-tx"><span class="di-label">外套</span><span class="di-val" id="wp-outer">-</span></div></div>
+          <div class="dress-item"><span class="di-badge dib-3">👖</span><div class="di-tx"><span class="di-label">下装</span><span class="di-val" id="wp-pants">-</span></div></div>
+          <div class="dress-item"><span class="di-badge dib-4">👟</span><div class="di-tx"><span class="di-label">鞋袜</span><span class="di-val" id="wp-shoes">-</span></div></div>
+          <div class="dress-item"><span class="di-badge dib-5">🎩</span><div class="di-tx"><span class="di-label">配饰</span><span class="di-val" id="wp-accessories">-</span></div></div>
+        </div>
+        <div class="dress-reminders" id="wp-reminders"></div>
+      </div>
       <div class="places-list" id="places-list"></div>
       <div class="list-bottom-space"></div>
     </div>
@@ -742,7 +774,7 @@ function toggleWeatherPanel() {
   var panel = document.getElementById('weather-panel');
   if (panel) panel.style.display = _weatherOpen ? 'block' : 'none';
   var arrow = document.getElementById('weather-arrow');
-  if (arrow) arrow.textContent = _weatherOpen ? '▲' : '▼';
+  if (arrow) arrow.textContent = _weatherOpen ? '▴' : '▾';
 }
 
 /* 骰子文案（提前声明，确保随时可用） */
@@ -3343,8 +3375,8 @@ function calcAllDistances(places) {
 function locateUser() {
   var locEl = document.getElementById('location-status');
   if (!locEl) return;
-  locEl.innerHTML = '<span style="color:#FFF">📍 定位中...</span>';
-  if (!navigator.geolocation) { locEl.innerHTML = '<span style="color:#FFE0E0">📍 不支持定位</span>'; if (_isLocal) { userLocation = FALLBACK_LOC; locationFailed = false; } return; }
+  locEl.innerHTML = '📍 定位中...';
+  if (!navigator.geolocation) { locEl.innerHTML = '<span style="color:#C0392B">📍 不支持定位</span>'; if (_isLocal) { userLocation = FALLBACK_LOC; locationFailed = false; } return; }
 
   _locAttempts = 0;
   _bestPos = null;
@@ -3355,8 +3387,12 @@ function locateUser() {
   /* 共用：天气回调 —— 更新天气芯片 + 穿衣建议面板 */
   function _onWeather(data) {
     if (!data) return;
-    var bar = document.getElementById('weather-bar');
-    if (bar) bar.style.display = 'flex';
+    var chip = document.getElementById('weather-chip');
+    if (chip) chip.style.display = 'flex';
+    var panel = document.getElementById('weather-panel');
+    if (panel) { panel.style.display = 'block'; _weatherOpen = true; }
+    var arrowEl = document.getElementById('weather-arrow');
+    if (arrowEl) arrowEl.textContent = '▴';
     var iconEl = document.getElementById('weather-icon');
     if (iconEl) iconEl.textContent = data.icon;
     var tempEl = document.getElementById('weather-temp');
@@ -3390,11 +3426,12 @@ function locateUser() {
         remEl.style.display = 'none';
       }
     }
-    _weatherOpen = false;
-    var panel = document.getElementById('weather-panel');
-    if (panel) panel.style.display = 'none';
-    var arrow = document.getElementById('weather-arrow');
-    if (arrow) arrow.textContent = '▼';
+    /* 穿衣助手默认展开 */
+    _weatherOpen = true;
+    var panel2 = document.getElementById('weather-panel');
+    if (panel2) panel2.style.display = 'block';
+    var arrow2 = document.getElementById('weather-arrow');
+    if (arrow2) arrow2.textContent = '▴';
   }
 
   function tryLocate() {
@@ -3412,7 +3449,7 @@ function locateUser() {
           return;
         }
         /* 精度不够好，再试一次（间隔800ms避免过于频繁） */
-        locEl.innerHTML = '<span style="color:#FFF">📍 精准定位中(' + _locAttempts + '/' + maxSamples + ')...</span>';
+        locEl.innerHTML = '📍 精准定位中(' + _locAttempts + '/' + maxSamples + ')...';
         setTimeout(tryLocate, 800);
       },
       function(err) {
@@ -3426,7 +3463,7 @@ function locateUser() {
         /* 本地调试 或 拒绝定位时：默认天安门 */
         if (_isLocal) { userLocation = FALLBACK_LOC; locationFailed = false; msg = '已定位（本地调试）'; }
         else { userLocation = FALLBACK_LOC; locationFailed = false; msg = '已默认天安门'; }
-        locEl.innerHTML = '<span style="color:#FFE0E0">📍 ' + msg + '</span>';
+        locEl.innerHTML = '<span style="color:#C77E1E">📍 ' + msg + '</span>';
         renderHomeList(getFilteredPlaces());
         setTimeout(preloadMap, 1500);
         /* 拉取天气 */
@@ -3442,7 +3479,7 @@ function locateUser() {
     userLocation = { lat: _bestPos.lat, lng: _bestPos.lng };
     locationFailed = false;
     var accText = _bestPos.accuracy < 50 ? '✅' : (_bestPos.accuracy < 200 ? '⚠️' : '📍');
-    locEl.innerHTML = '<span style="color:#FFFFFF">' + accText + ' 已定位(±' + Math.round(_bestPos.accuracy) + 'm)</span>';
+    locEl.innerHTML = accText + ' 已定位(±' + Math.round(_bestPos.accuracy) + 'm)';
     renderHomeList(getFilteredPlaces());
     setTimeout(preloadMap, 1500);
 
@@ -3498,18 +3535,42 @@ function renderNextBatch() {
   for (var i = start; i < end; i++) {
     var p = filteredForLazy[i];
     var fac = p.facilities.slice(0, 5);
-    var free = hasFree(p);
-    var costColor = p.cost === "免费" ? "var(--fog-dark)" : "#E67E00";
-    var costBorder = p.cost === "免费" ? "rgba(56,142,60,0.4)" : "rgba(230,126,0,0.4)";
+    var isFree = (p.cost === '免费' || /免费/.test(p.cost || ''));
+
+    /* 分类 → 图标徽章 */
+    var cat = p.category || '户外公园';
+    var badgeCls = 'b-park', badgeEmoji = '🌿';
+    if (cat === '游乐场') { badgeCls = 'b-play'; badgeEmoji = '🎠'; }
+    else if (cat === '自然探索') { badgeCls = 'b-nature'; badgeEmoji = '⛰️'; }
+    else if (cat === '街心公园') { badgeCls = 'b-street'; badgeEmoji = '🌳'; }
+    else if (cat === '展馆') { badgeCls = 'b-exhibit'; badgeEmoji = '🏛️'; }
+    else if (p.scene === '室内') { badgeCls = 'b-exhibit'; badgeEmoji = '🏠'; }
+
+    /* 简介 / 避雷 拆分 */
+    var note = p.note || '';
+    var desc = note, warn = '';
+    var m = note.split(/避雷[:：]?/);
+    if (m.length > 1) {
+      desc = m[0].replace(/[\s·。，,]+$/,'');
+      warn = m.slice(1).join('避雷').trim();
+      warn = warn.split('【')[0].trim();          /* 去掉【特色】等附加段 */
+      if (warn.length > 30) warn = warn.slice(0, 30).replace(/[，,、；;\s]+$/,'') + '…';
+    }
+    if (desc.length > 44) desc = desc.slice(0, 44).replace(/[，,、；;\s]+$/,'') + '…';
+
+    var distHtml = (!locationFailed && p._distance !== null)
+      ? ' <span class="pc-dist">· 🚶 '+p._distance.toFixed(1)+' km</span>' : '';
+
     html += '<div class="place-card" onclick="openDetail('+p.id+')">'
-      + '<div class="place-card-top">'
-      + '<div class="place-name-row">'
-      + '<div class="place-name">'+p.name+'</div>'
-      + '<div class="place-cost" style="color:'+costColor+';border:1.5px solid '+costBorder+'">'+p.cost+'</div>'
-      + '</div></div>'
-      + '<div class="place-address-row">📍 '+p.address+(!locationFailed ? ' &nbsp;|&nbsp; 🚶 '+(p._distance !== null ? p._distance.toFixed(1) : '?')+' km' : '')+'</div>'
-      + (p.note ? '<div class="place-note">💬 '+p.note+'</div>' : '')
-      + '<div class="place-facilities">';
+      + '<div class="pc-head">'
+      + '<div class="pc-badge '+badgeCls+'">'+badgeEmoji+'</div>'
+      + '<div class="pc-title-wrap"><div class="pc-title">'+p.name+'</div></div>'
+      + '<div class="pc-cost '+(isFree?'free':'paid')+'">'+p.cost+'</div>'
+      + '</div>'
+      + '<div class="pc-addr"><span class="pc-pin">📍</span> '+p.address+distHtml+'</div>'
+      + (desc ? '<div class="pc-desc">'+desc+'</div>' : '')
+      + (warn ? '<div class="pc-warn"><b>⚠️ 避雷</b> '+warn+'</div>' : '')
+      + '<div class="pc-tags">';
     for (var j = 0; j < fac.length; j++) {
       if (VALID_FACILITIES.indexOf(fac[j]) !== -1) {
         var facClass = '';
@@ -3524,31 +3585,19 @@ function renderNextBatch() {
     }
     var validCount = fac.filter(function(f){ return VALID_FACILITIES.indexOf(f) !== -1; }).length;
     if (validCount > 5) {
-      html += '<span class="facility-mini" style="color:var(--tx-muted)">+'+(validCount-5)+'</span>';
+      html += '<span class="facility-mini">+'+(validCount-5)+'</span>';
     }
     html += '</div>';
     if (p.size) {
       var sizeText = p.size;
       var sizeLabel = sizeText.split('·')[0];
       var sizeEmoji = sizeLabel.indexOf('超大')!==-1?'🏕️':sizeLabel.indexOf('大型')!==-1?'🌲':sizeLabel.indexOf('中型')!==-1?'🌳':'🌿';
-      html += '<div class="place-size">'+sizeEmoji+' '+sizeText+'</div>';
+      var sizeParts = sizeText.split('·');
+      var sizeMain = sizeParts.shift();
+      var sizeRest = sizeParts.join('·');
+      html += '<div class="pc-size">'+sizeEmoji+' <b>'+sizeMain+'</b>'+(sizeRest?' · '+sizeRest:'')+'</div>';
     }
-    /* 分类标签 + 室内外角标 */
-    var cat = p.category || '户外公园';
-    var catCls = 'cat-chip';
-    if (cat === '游乐场') catCls += ' cat-play';
-    else if (cat === '自然探索') catCls += ' cat-nature';
-    else if (cat === '街心公园') catCls += ' cat-street';
-    else if (cat === '展馆') catCls += ' cat-exhibit';
-    html += '<div class="place-cat-row">';
-    html += '<span class="'+catCls+'">'+cat+'</span>';
-    if (p.scene === '室内') html += '<span class="scene-badge">室内</span>';
-    else html += '<span class="scene-badge" style="background:#E8F5E9;color:#2E7D32">室外</span>';
     html += '</div>';
-    html += '<div class="place-footer">';
-    html += '<div class="parking-hint'+(free?' free':'')+'">🚗 '+p.parking.length+' 个停车方案'+(free?'（含免费）':'')+'</div>';
-    html += '<div class="facility-count">🎯 '+p.facilities.length+' 项设施</div>';
-    html += '</div></div>';
   }
   c.innerHTML += html;
 
