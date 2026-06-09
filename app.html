@@ -277,22 +277,27 @@
     @keyframes mapFadeIn { from{opacity:0;} to{opacity:1;} }
 
     .map-header { display:flex;align-items:center;justify-content:space-between;
-      padding:12px 16px;background:var(--fog-green);color:#fff;flex-shrink:0;
-      box-shadow:0 2px 8px rgba(0,0,0,.1);z-index:10; }
-    .map-header-left { display:flex;align-items:baseline;gap:8px; }
-    .map-header-title { font-size:16px;font-weight:700;display:flex;align-items:center;gap:6px; }
-    .map-header-hint { font-size:11px;font-weight:400;color:rgba(255,255,255,0.65); }
-    .map-close-btn { font-size:22px;background:none;color:#fff;border:none;
-      cursor:pointer;padding:4px 12px;-webkit-tap-highlight-color:transparent;
-      border-radius:var(--r-xs);line-height:1.5; }
-    .map-close-btn:active { background:rgba(255,255,255,.2); }
+      padding:calc(env(safe-area-inset-top,18px) + 8px) 16px 12px;
+      background:linear-gradient(155deg, #45BD84 0%, #277A52 100%);color:#fff;flex-shrink:0;
+      box-shadow:0 2px 10px rgba(39,122,82,.18);z-index:10; }
+    .map-header-left { display:flex;align-items:center;gap:10px; }
+    .map-header-ico { width:36px;height:36px;border-radius:11px;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;font-size:18px;
+      background:rgba(255,255,255,0.2); }
+    .map-header-tt { display:flex;flex-direction:column;gap:2px; }
+    .map-header-title { font-size:16px;font-weight:700;line-height:1.2; }
+    .map-header-hint { font-size:11px;font-weight:400;color:rgba(255,255,255,0.78);line-height:1.2; }
+    .map-close-btn { width:36px;height:36px;font-size:18px;background:rgba(255,255,255,0.2);color:#fff;border:none;
+      cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;
+      border-radius:11px;flex-shrink:0; }
+    .map-close-btn:active { background:rgba(255,255,255,.35); }
 
     .map-body { flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative; }
     #leaflet-map { position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;z-index:1; }
 
     /* 地图加载中 */
     .map-loading { position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;text-align:center;transition:opacity .25s ease; }
-    .map-spinner { width:36px;height:36px;border:3.5px solid #E8F5E9;border-top-color:#07C160;border-radius:50%;animation:mapSpin .7s linear infinite;margin:0 auto 10px; }
+    .map-spinner { width:36px;height:36px;border:3.5px solid var(--fog-subtle);border-top-color:var(--fog-green);border-radius:50%;animation:mapSpin .7s linear infinite;margin:0 auto 10px; }
     @keyframes mapSpin { to{ transform:rotate(360deg);} }
     .map-loading-text { font-size:13px;color:var(--tx-secondary);font-weight:500; }
 
@@ -323,7 +328,14 @@
     .map-place-info { flex:1;min-width:0; }
     .map-place-name { font-size:15px;font-weight:650;color:var(--tx-primary);
       margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-    .map-place-dist { font-size:12.5px;color:var(--c-free);font-weight:600; }
+    .map-place-dist { font-size:12.5px;color:var(--fog-dark);font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
+    .map-place-cost { font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;
+      max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .map-place-cost.free { background:var(--tag-mint);color:var(--fog-dark); }
+    .map-place-cost.paid { background:var(--tag-cream);color:var(--c-paid); }
+    .map-nav-btn { display:inline-flex;align-items:center;gap:4px;color:var(--fog-dark);font-size:12px;font-weight:700;
+      text-decoration:none;padding:6px 14px;background:var(--tag-mint);border-radius:999px;border:1px solid var(--bd); }
+    .map-nav-btn:active { background:var(--fog-subtle); }
     .map-place-address { font-size:11.5px;color:var(--tx-muted);
       margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
     .map-place-detail { display:none;padding:10px 14px 14px;margin-top:6px;
@@ -592,8 +604,11 @@
   <div class="map-overlay" id="map-overlay">
     <div class="map-header">
       <div class="map-header-left">
-        <div class="map-header-title">🗺️ 周边公园地图</div>
-        <div class="map-header-hint">地图展示偏差持续修复中</div>
+        <div class="map-header-ico">🗺️</div>
+        <div class="map-header-tt">
+          <div class="map-header-title">周边公园地图</div>
+          <div class="map-header-hint">地图展示偏差持续修复中</div>
+        </div>
       </div>
       <button class="map-close-btn" onclick="closeMapLayer()">✕</button>
     </div>
@@ -4377,11 +4392,11 @@ function _initMap() {
 
   /* 分类颜色 */
   var CAT_COLORS = {
-    '户外公园': '#07C160',
-    '游乐场': '#FF7043',
-    '自然探索': '#42A5F5',
-    '街心公园': '#AB47BC',
-    '展馆': '#FFA726'
+    '户外公园': '#2FA06A',
+    '游乐场': '#E2613F',
+    '自然探索': '#4FA3E3',
+    '街心公园': '#7C5CD6',
+    '展馆': '#E9A615'
   };
   function catColor(cat) { return CAT_COLORS[cat] || '#9BC5A0'; }
 
@@ -4446,16 +4461,16 @@ function _initMap() {
       + '<div class="map-place-rank" style="background:'+rankBg+'">'+(j+1)+'</div>'
       + '<div class="map-place-info">'
       + '<div class="map-place-name"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+catColorVal+';margin-right:6px;vertical-align:middle;"></span>'+pj.name+'</div>'
-      + '<div class="map-place-dist">🚶 '+dj+' km &nbsp;&nbsp;'+pj.cost+'</div>'
+      + '<div class="map-place-dist">🚶 '+dj+' km <span class="map-place-cost '+((pj.cost==='免费'||/免费/.test(pj.cost||''))?'free':'paid')+'">'+pj.cost+'</span></div>'
       + '<div class="map-place-address">'+pj.address+'</div>'
       + '<div class="map-place-detail">'+detailNote+detailFac+'</div>'
-      + '<div style="text-align:right;margin-top:6px;"><a href="javascript:void(0)" onclick="openNavigation(window.__mapPlaces['+j+']);event.stopPropagation();return false;" style="display:inline-block;color:#07C160;font-size:12px;font-weight:600;text-decoration:none;padding:3px 10px;border:1px solid #07C160;border-radius:12px;">🧭 导航</a></div>'
+      + '<div style="text-align:right;margin-top:8px;"><a href="javascript:void(0)" class="map-nav-btn" onclick="openNavigation(window.__mapPlaces['+j+']);event.stopPropagation();return false;">🧭 导航</a></div>'
       + '</div></div>';
   }
   document.getElementById('map-place-list').innerHTML = html;
 
   /* 分类图例 */
-  var legendHtml = '<div class="map-legend"><div class="map-legend-title">🏷️ 公园分类</div>';
+  var legendHtml = '<div class="map-legend"><div class="map-legend-title">🍃 公园分类</div>';
   var catOrder = ['户外公园','游乐场','自然探索','街心公园','展馆'];
   for (var ci = 0; ci < catOrder.length; ci++) {
     legendHtml += '<div class="map-legend-item"><span class="map-legend-dot" style="background:'+CAT_COLORS[catOrder[ci]]+'"></span>'+catOrder[ci]+'</div>';
